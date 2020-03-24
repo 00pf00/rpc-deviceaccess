@@ -22,11 +22,10 @@ import javax.annotation.PreDestroy;
  * Created by Administrator on 2018/4/17.
  */
 @Service
-public class DefaultActorService implements SessionMsgProcessor,RpcMsgProcessor,FromServerMsgProcessor {
+public class DefaultActorService implements SessionMsgProcessor, RpcMsgProcessor, FromServerMsgProcessor {
 
-    private static final String ACTOR_SYSTEM_NAME = "Akka";
     public static final String CORE_DISPATCHER_NAME = "core-dispatcher";
-
+    private static final String ACTOR_SYSTEM_NAME = "Akka";
     @Autowired
     private ActorSystemContext actorContext;
 
@@ -37,7 +36,7 @@ public class DefaultActorService implements SessionMsgProcessor,RpcMsgProcessor,
     private ActorRef appActor;
 
     @PostConstruct
-    public void initActorSystem(){
+    public void initActorSystem() {
         //actorContext.setSessionManagerActor(this);
         system = ActorSystem.create(ACTOR_SYSTEM_NAME, actorContext.getConfig());
         actorContext.setActorSystem(system);
@@ -64,16 +63,16 @@ public class DefaultActorService implements SessionMsgProcessor,RpcMsgProcessor,
 
     @Override
     public void process(SessionAwareMsg sessionMsg) {
-        sessionManagerActor.tell(sessionMsg,ActorRef.noSender());
+        sessionManagerActor.tell(sessionMsg, ActorRef.noSender());
     }
 
     @Override
     public void process(FromServerMsg msg) {
-        appActor.tell(msg,ActorRef.noSender());
+        appActor.tell(msg, ActorRef.noSender());
     }
 
     @Override
     public void process(BasicFromServerMsg msg) {
-        appActor.tell(msg,ActorRef.noSender());
+        appActor.tell(msg, ActorRef.noSender());
     }
 }

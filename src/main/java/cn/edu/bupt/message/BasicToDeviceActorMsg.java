@@ -7,16 +7,18 @@ import lombok.Getter;
 /**
  * Created by Administrator on 2018/4/17.
  */
-public class BasicToDeviceActorMsg implements FromSessionActorToDeviceActorMsg{
+public class BasicToDeviceActorMsg implements FromSessionActorToDeviceActorMsg {
 
     AdaptorToSessionActorMsg msg;
     @Getter
     Device device;
-    public BasicToDeviceActorMsg(AdaptorToSessionActorMsg msg,Device device){
+
+    public BasicToDeviceActorMsg(AdaptorToSessionActorMsg msg, Device device) {
         this.msg = msg;
         this.device = device;
     }
-    public AdaptorToSessionActorMsg getMsg(){
+
+    public AdaptorToSessionActorMsg getMsg() {
         return msg;
     }
 
@@ -25,10 +27,12 @@ public class BasicToDeviceActorMsg implements FromSessionActorToDeviceActorMsg{
 
         return device.getId().toString();
     }
+
     @Override
     public String getTenantId() {
         return device.getTenantId().toString();
     }
+
     @Override
     public SessionId getSessionId() {
         return msg.getSessionId();

@@ -14,11 +14,11 @@ import scala.concurrent.duration.Duration;
 /**
  * Created by Administrator on 2018/4/16.
  */
-public class SessionActor extends ContextAwareActor{
+public class SessionActor extends ContextAwareActor {
     private final SessionId sessionId;
-    private SessionActorProcessor  processor;
+    private SessionActorProcessor processor;
 
-    private SessionActor(ActorSystemContext context,SessionId sessionId){
+    private SessionActor(ActorSystemContext context, SessionId sessionId) {
         super(context);
         this.sessionId = sessionId;
     }
@@ -37,23 +37,23 @@ public class SessionActor extends ContextAwareActor{
 
     @Override
     public void onReceive(Object msg) throws Exception {
-        System.out.println("session receive "+ msg);
-        if(msg instanceof SessionCtrlMsg){
-            processSessionCtrlMsg((SessionCtrlMsg)msg);
-        }else if(msg instanceof FromDeviceActorToSessionActorMsg){
-            processFromDeviceToSessionActorMsg((FromDeviceActorToSessionActorMsg)msg);
-        }else if(msg instanceof FromSessionActorToDeviceActorMsg){
-            processFromSessionActorToDeviceActorMsg((FromSessionActorToDeviceActorMsg)msg);
-        }else if(msg instanceof SessionTimeoutMsg){
+        System.out.println("session receive " + msg);
+        if (msg instanceof SessionCtrlMsg) {
+            processSessionCtrlMsg((SessionCtrlMsg) msg);
+        } else if (msg instanceof FromDeviceActorToSessionActorMsg) {
+            processFromDeviceToSessionActorMsg((FromDeviceActorToSessionActorMsg) msg);
+        } else if (msg instanceof FromSessionActorToDeviceActorMsg) {
+            processFromSessionActorToDeviceActorMsg((FromSessionActorToDeviceActorMsg) msg);
+        } else if (msg instanceof SessionTimeoutMsg) {
 
         }
     }
 
     private void processFromDeviceToSessionActorMsg(FromDeviceActorToSessionActorMsg msg) {
-        FromServerRpcMsg msg1 = (FromServerRpcMsg)msg.getServerMsg();
+        FromServerRpcMsg msg1 = (FromServerRpcMsg) msg.getServerMsg();
         int requestId = msg1.getRpcRequestId();
         String data = msg1.getRpcRequestPayLoad();
-        processor.processToDeviceRpcRequestMsg(requestId,data);
+        processor.processToDeviceRpcRequestMsg(requestId, data);
     }
 
     private void processFromSessionActorToDeviceActorMsg(FromSessionActorToDeviceActorMsg msg) {
@@ -63,16 +63,16 @@ public class SessionActor extends ContextAwareActor{
 
     private void initProcessor(FromSessionActorToDeviceActorMsg msg) {
         if (processor == null) {
-            DeviceAwareSessionContext context = ((BasicAdapterToSessionActorMsg)(((BasicToDeviceActorMsg)msg).getMsg())).getContext();
-            processor = new MqttSessionActorProcessor(systemContext,msg.getSessionId(),context);
+            DeviceAwareSessionContext context = ((BasicAdapterToSessionActorMsg) (((BasicToDeviceActorMsg) msg).getMsg())).getContext();
+            processor = new MqttSessionActorProcessor(systemContext, msg.getSessionId(), context);
         }
     }
 
     private void processSessionCtrlMsg(SessionCtrlMsg msg) {
-        if(processor != null){
-            processor.processSessionCtrlMsg(context(),msg);
-        }else{
-            if(msg instanceof SessionCloseMsg){
+        if (processor != null) {
+            processor.processSessionCtrlMsg(context(), msg);
+        } else {
+            if (msg instanceof SessionCloseMsg) {
                 context().parent().tell(new SessionTerminationMsg(msg.getSessionId()), ActorRef.noSender());
                 context().stop(context().self());
             }

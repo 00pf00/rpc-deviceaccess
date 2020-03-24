@@ -8,9 +8,11 @@ import cn.edu.bupt.common.SessionId;
 public class SessionTerminationMsg {
     private final SessionId sessionId;
 
-    public SessionTerminationMsg(SessionId sessionId){
+    public SessionTerminationMsg(SessionId sessionId) {
         this.sessionId = sessionId;
     }
 
-    public SessionId getSessionId(){return sessionId;}
+    public SessionId getSessionId() {
+        return sessionId;
+    }
 }

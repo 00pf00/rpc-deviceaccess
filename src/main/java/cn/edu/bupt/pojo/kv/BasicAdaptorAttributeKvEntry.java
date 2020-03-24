@@ -7,7 +7,7 @@ public class BasicAdaptorAttributeKvEntry implements AttributeKvEntry {
     private final cn.edu.bupt.common.entry.KvEntry kv;
     private final long ts;
 
-    public BasicAdaptorAttributeKvEntry(cn.edu.bupt.common.entry.KvEntry kv,long ts) {
+    public BasicAdaptorAttributeKvEntry(cn.edu.bupt.common.entry.KvEntry kv, long ts) {
         this.kv = kv;
         this.ts = ts;
     }
@@ -20,7 +20,7 @@ public class BasicAdaptorAttributeKvEntry implements AttributeKvEntry {
 
     @Override
     public DataType getDataType() {
-        switch(kv.getDataType()){
+        switch (kv.getDataType()) {
             case "string":
                 return DataType.STRING;
             case "long":

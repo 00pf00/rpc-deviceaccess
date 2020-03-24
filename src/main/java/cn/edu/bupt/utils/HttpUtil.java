@@ -9,41 +9,42 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * Created by Administrator on 2018/5/23.
  */
 public class HttpUtil {
     private static OkHttpClient client = new OkHttpClient();
-    public static void main(String[] args)throws Exception{
-        JsonObject obj = getDeviceServiceDes("bupt","switch","1","control switch");
+
+    public static void main(String[] args) throws Exception {
+        JsonObject obj = getDeviceServiceDes("bupt", "switch", "1", "control switch");
         System.out.println(obj);
     }
-    public static JsonObject getDeviceServiceDes(String manufacture, String deviceType, String model,String serviceName) throws IOException{
+
+    public static JsonObject getDeviceServiceDes(String manufacture, String deviceType, String model, String serviceName) throws IOException {
 //        String url = "http://172.24.32.167:8000/api/v1/ability/"+manufacture+"/"+deviceType+"/"+model;
-        String url = "http://servicemanagement:8000/api/v1/servicemanagement/ability/"+manufacture+"/"+deviceType+"/"+model;
+        String url = "http://servicemanagement:8000/api/v1/servicemanagement/ability/" + manufacture + "/" + deviceType + "/" + model;
         Request.Builder builder = new Request.Builder()
                 .url(url)
-                .get() ;
+                .get();
         String tocken = cn.edu.bupt.security.HttpUtil.getAccessToken();
-        builder.header("Authorization","Bearer "+tocken);
+        builder.header("Authorization", "Bearer " + tocken);
 
-        Request request =  builder.build();
+        Request request = builder.build();
         Response response = client.newCall(request).execute();
-        if (response.isSuccessful()){
+        if (response.isSuccessful()) {
             String str = response.body().string();
             JsonArray obj = new JsonParser().parse(str).getAsJsonArray();
-            for(JsonElement ele:obj){
-               String str1 =  ele.getAsJsonObject().get("abilityDes").getAsString();
-               JsonObject o = new  JsonParser().parse(str1).getAsJsonObject();
+            for (JsonElement ele : obj) {
+                String str1 = ele.getAsJsonObject().get("abilityDes").getAsString();
+                JsonObject o = new JsonParser().parse(str1).getAsJsonObject();
 
-               if (serviceName.equals(o.get("serviceName").getAsString())){
+                if (serviceName.equals(o.get("serviceName").getAsString())) {
                     return o;
-               }
+                }
             }
             return null;
-        }else{
+        } else {
             return null;
         }
     }

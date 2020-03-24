@@ -7,27 +7,23 @@ import cn.edu.bupt.pojo.event.Event;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
 import com.datastax.driver.core.utils.UUIDs;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static cn.edu.bupt.dao.ModelConstants.*;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 
 /**
  * Created by CZX on 2018/5/28.
  */
 @Component
 @Slf4j
-public class CassandraBaseEventDao extends CassandraAbstractSearchTimeDao<Event> implements EventDao{
+public class CassandraBaseEventDao extends CassandraAbstractSearchTimeDao<Event> implements EventDao {
 
 //    private final TenantId systemTenantId = new TenantId(NULL_UUID);
 

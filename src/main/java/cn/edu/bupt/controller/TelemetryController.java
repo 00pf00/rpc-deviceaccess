@@ -19,7 +19,7 @@ public class TelemetryController extends BaseController {
 
     //通过设备ID和查询内容获取所有历史数据
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'getAllData')")
-    @RequestMapping(value="/alldata/{deviceId}",method = RequestMethod.GET)
+    @RequestMapping(value = "/alldata/{deviceId}", method = RequestMethod.GET)
     public List<TsKvEntry> getAllData(@PathVariable("deviceId") String deviceId,
                                       @RequestParam String key,
                                       @RequestParam String startTs,
@@ -27,15 +27,15 @@ public class TelemetryController extends BaseController {
                                       @RequestParam int interval,
                                       @RequestParam int limit,
                                       @RequestParam String aggregation
-                                      ) throws Exception {
-        try{
+    ) throws Exception {
+        try {
             List<TsKvQuery> queries = new ArrayList<>();
             TsKvQuery tsKvQuery = new BaseTsKvQuery(key, Long.parseLong(startTs), Long.parseLong(endTs), interval, limit, Aggregation.valueOf(aggregation));
             queries.add(tsKvQuery);
-            ListenableFuture<List<TsKvEntry>> listListenableFuture = baseTimeseriesService.findAll(toUUID(deviceId),queries);
+            ListenableFuture<List<TsKvEntry>> listListenableFuture = baseTimeseriesService.findAll(toUUID(deviceId), queries);
             List<TsKvEntry> ls = listListenableFuture.get();
             return ls;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -45,12 +45,12 @@ public class TelemetryController extends BaseController {
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'getlatestData')")
     @RequestMapping(value = "/alllatestdata/{deviceId}", method = RequestMethod.GET)
     public List<TsKvEntry> getlatestData(@PathVariable("deviceId") String deviceId)
-    throws Exception{
-        try{
+            throws Exception {
+        try {
             ListenableFuture<List<TsKvEntry>> tskventry = baseTimeseriesService.findAllLatest(toUUID(deviceId));
             List<TsKvEntry> ls = tskventry.get();
             return ls;
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -62,13 +62,13 @@ public class TelemetryController extends BaseController {
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'getlatestData')")
     @RequestMapping(value = "/latestdata/{deviceId}/{keys}", method = RequestMethod.GET)
     public List<TsKvEntry> getlatestData(@PathVariable("deviceId") String deviceId
-    ,@PathVariable("keys") Collection<String> keys)
-            throws Exception{
-        try{
+            , @PathVariable("keys") Collection<String> keys)
+            throws Exception {
+        try {
             ListenableFuture<List<TsKvEntry>> tskventry = baseTimeseriesService.findLatest(toUUID(deviceId), keys);
             List<TsKvEntry> ls = tskventry.get();
             return ls;
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -77,12 +77,12 @@ public class TelemetryController extends BaseController {
     //获取所有的数据的键类型
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'findAllKeys')")
     @RequestMapping(value = "/allKeys/{deviceId}", method = RequestMethod.GET)
-    public List<String> findAllKeys(@PathVariable("deviceId") String deviceId) throws Exception{
-        try{
+    public List<String> findAllKeys(@PathVariable("deviceId") String deviceId) throws Exception {
+        try {
             ListenableFuture<List<String>> listListenableFuture = baseTimeseriesService.findAllKeys(toUUID(deviceId));
             List<String> ls = listListenableFuture.get();
             return ls;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }

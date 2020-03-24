@@ -19,16 +19,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by Administrator on 2018/4/17.
  */
-public class MqttSessionActorProcessor implements  SessionActorProcessor{
+public class MqttSessionActorProcessor implements SessionActorProcessor {
 
+    private static final ByteBufAllocator ALLOCATOR = new UnpooledByteBufAllocator(false);
     protected final ActorSystemContext systemContext;
-    private boolean firstMsg = true;
     protected final SessionId sessionId;
     protected DeviceAwareSessionContext sessionCtx;
+    private boolean firstMsg = true;
     private AtomicInteger next = new AtomicInteger(0);
-    private static final ByteBufAllocator ALLOCATOR = new UnpooledByteBufAllocator(false);
 
-    public MqttSessionActorProcessor(ActorSystemContext systemContext,SessionId sessionId,DeviceAwareSessionContext sessionCtx){
+    public MqttSessionActorProcessor(ActorSystemContext systemContext, SessionId sessionId, DeviceAwareSessionContext sessionCtx) {
         this.systemContext = systemContext;
         this.sessionId = sessionId;
         this.sessionCtx = sessionCtx;
@@ -36,8 +36,8 @@ public class MqttSessionActorProcessor implements  SessionActorProcessor{
 
     @Override
     public void processSessionCtrlMsg(ActorContext context, SessionCtrlMsg msg) {
-        if(msg instanceof SessionCloseMsg){
-            cleanupSession(msg,context);
+        if (msg instanceof SessionCloseMsg) {
+            cleanupSession(msg, context);
             context.parent().tell(new SessionTerminationMsg(msg.getSessionId()), ActorRef.noSender());
             context.stop(context.self());
         }
@@ -51,31 +51,33 @@ public class MqttSessionActorProcessor implements  SessionActorProcessor{
 
     @Override
     public void processToDeviceRpcRequestMsg(int requestId, String data) {
-        String topic = MqttTopics.DEVICE_RPC_REQUESTS_TOPIC+requestId;
-        MqttMessage msg = createMqttPublishMsg(topic,data);
-        if(sessionCtx instanceof DeviceSessionCtx){
-            ((DeviceSessionCtx)sessionCtx).getChannelHandlerContext().writeAndFlush(msg);
+        String topic = MqttTopics.DEVICE_RPC_REQUESTS_TOPIC + requestId;
+        MqttMessage msg = createMqttPublishMsg(topic, data);
+        if (sessionCtx instanceof DeviceSessionCtx) {
+            ((DeviceSessionCtx) sessionCtx).getChannelHandlerContext().writeAndFlush(msg);
         }
     }
-    private MqttPublishMessage createMqttPublishMsg(String topic, String  data) {
+
+    private MqttPublishMessage createMqttPublishMsg(String topic, String data) {
         MqttFixedHeader mqttFixedHeader =
                 new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.AT_LEAST_ONCE, false, 0);
-        MqttPublishVariableHeader header = new MqttPublishVariableHeader(topic,next.incrementAndGet());
+        MqttPublishVariableHeader header = new MqttPublishVariableHeader(topic, next.incrementAndGet());
         ByteBuf payload = ALLOCATOR.buffer();
         payload.writeBytes(data.getBytes(Charset.forName("UTF-8")));
         return new MqttPublishMessage(mqttFixedHeader, header, payload);
     }
+
     private void updateSessionCtx(FromSessionActorToDeviceActorMsg msg) {
-        if(msg instanceof  BasicToDeviceActorMsg){
-            AdaptorToSessionActorMsg msg1 = ((BasicToDeviceActorMsg)msg).getMsg();
-            if(msg1 instanceof BasicAdapterToSessionActorMsg){
-                sessionCtx = ((BasicAdapterToSessionActorMsg)msg1).getContext();
+        if (msg instanceof BasicToDeviceActorMsg) {
+            AdaptorToSessionActorMsg msg1 = ((BasicToDeviceActorMsg) msg).getMsg();
+            if (msg1 instanceof BasicAdapterToSessionActorMsg) {
+                sessionCtx = ((BasicAdapterToSessionActorMsg) msg1).getContext();
             }
         }
     }
 
     private void cleanupSession(SessionCtrlMsg msg, ActorContext context) {
-        systemContext.getAppActor().tell(new BasicToDeviceActorSessionMsg(msg,sessionCtx.getDevice()),ActorRef.noSender());
+        systemContext.getAppActor().tell(new BasicToDeviceActorSessionMsg(msg, sessionCtx.getDevice()), ActorRef.noSender());
     }
 
 

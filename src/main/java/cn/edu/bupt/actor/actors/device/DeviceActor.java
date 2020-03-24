@@ -10,38 +10,38 @@ import cn.edu.bupt.message.*;
 /**
  * Created by Administrator on 2018/4/17.
  */
-public class DeviceActor extends ContextAwareActor{
+public class DeviceActor extends ContextAwareActor {
 
     private final String tenantId;
     private final String deviceId;
     private final DeviceActorMsgProcessor processor;
 
-    private DeviceActor(ActorSystemContext systemContext,String tenantId,String deviceId){
+    private DeviceActor(ActorSystemContext systemContext, String tenantId, String deviceId) {
         super(systemContext);
         this.tenantId = tenantId;
         this.deviceId = deviceId;
         // TODO 待修改
-        this.processor  = new DeviceActorMsgProcessor(systemContext);
+        this.processor = new DeviceActorMsgProcessor(systemContext);
     }
 
     @Override
     public void onReceive(Object msg) throws Exception {
-        if(msg instanceof BasicToDeviceActorMsg){
-            processor.process((BasicToDeviceActorMsg)msg);
-        }else if(msg instanceof BasicToDeviceActorSessionMsg){
+        if (msg instanceof BasicToDeviceActorMsg) {
+            processor.process((BasicToDeviceActorMsg) msg);
+        } else if (msg instanceof BasicToDeviceActorSessionMsg) {
             SessionAwareMsg msg1 = ((BasicToDeviceActorSessionMsg) msg).getMsg();
             String deviceId = ((BasicToDeviceActorSessionMsg) msg).getDeviceId();
-            if(msg1 instanceof SessionCloseMsg){
-                if(processor.jugeWhetherDie(msg1.getSessionId())) {
+            if (msg1 instanceof SessionCloseMsg) {
+                if (processor.jugeWhetherDie(msg1.getSessionId())) {
                     System.out.println("kill current device actor");
                     context().parent().tell(new DeviceTerminationMsg(deviceId), ActorRef.noSender());
                     context().stop(context().self());
-                }else{
+                } else {
                     System.out.println("shoud not kill current device actor");
                 }
             }
-        }else if(msg instanceof FromServerMsg){
-            processor.process((FromServerMsg)msg);
+        } else if (msg instanceof FromServerMsg) {
+            processor.process((FromServerMsg) msg);
         }
     }
 
@@ -51,7 +51,7 @@ public class DeviceActor extends ContextAwareActor{
         private final String deviceId;
         private final transient ActorSystemContext context;
 
-        public ActorCreator(ActorSystemContext context, String  tenantId,String deviceId) {
+        public ActorCreator(ActorSystemContext context, String tenantId, String deviceId) {
             this.context = context;
             this.tenantId = tenantId;
             this.deviceId = deviceId;
@@ -59,7 +59,7 @@ public class DeviceActor extends ContextAwareActor{
 
         @Override
         public DeviceActor create() throws Exception {
-            return new DeviceActor(context,tenantId,deviceId);
+            return new DeviceActor(context, tenantId, deviceId);
         }
     }
 }

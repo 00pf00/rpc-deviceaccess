@@ -9,5 +9,5 @@ import java.util.Map;
  * Created by Administrator on 2018/4/13.
  */
 public interface TelemetryUploadRequest extends FromDeviceMsg {
-    Map<Long,List<KvEntry>> getData();
+    Map<Long, List<KvEntry>> getData();
 }

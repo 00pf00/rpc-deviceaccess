@@ -5,7 +5,6 @@ import java.util.Optional;
 
 /**
  * Represents attribute or any other KV data entry
- *
  */
 public interface KvEntry extends Serializable {
 

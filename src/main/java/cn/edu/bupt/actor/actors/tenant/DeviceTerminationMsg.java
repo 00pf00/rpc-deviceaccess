@@ -7,7 +7,7 @@ public class DeviceTerminationMsg {
 
     private final String deviceId;
 
-    public DeviceTerminationMsg(String deviceId){
+    public DeviceTerminationMsg(String deviceId) {
         this.deviceId = deviceId;
     }
 

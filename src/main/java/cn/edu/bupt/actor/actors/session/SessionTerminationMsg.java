@@ -10,7 +10,7 @@ public class SessionTerminationMsg {
     @Getter
     private final SessionId sessionId;
 
-    public SessionTerminationMsg(SessionId sessionId){
+    public SessionTerminationMsg(SessionId sessionId) {
         this.sessionId = sessionId;
     }
 }

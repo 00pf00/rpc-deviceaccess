@@ -21,7 +21,7 @@ public interface DeviceService {
 
     void assignDeviceToGroup(UUID deviceId, UUID groupId);
 
-    Device assignDeviceToCustomer(UUID deviceId,Integer customerId);
+    Device assignDeviceToCustomer(UUID deviceId, Integer customerId);
 
     Device unassignDeviceFromCustomer(UUID deviceId);
 
@@ -47,15 +47,15 @@ public interface DeviceService {
 
     TextPageData<Device> findDevicesByTenantIdAndSiteId(Integer tenantId, Integer siteId, TextPageLink pageLink);
 
-    TextPageData<Device> findDevices(Integer tenantId,TextPageLink pageLink);
+    TextPageData<Device> findDevices(Integer tenantId, TextPageLink pageLink);
 
-    String sendMessage(Device device,String message);
+    String sendMessage(Device device, String message);
 
     Long findDevicesCount(Integer tenantId);
 
     Long findCustomerDevicesCount(Integer customerId);
 
-    Device updateDeviceSiteId(UUID deviceId,Integer siteId);
+    Device updateDeviceSiteId(UUID deviceId, Integer siteId);
 
     Long findDevicesCountWithTextSearch(Integer tenantId, TextPageLink pageLink);
 

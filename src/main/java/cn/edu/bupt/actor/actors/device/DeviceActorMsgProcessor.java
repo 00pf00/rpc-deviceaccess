@@ -35,43 +35,43 @@ import java.util.*;
  */
 public class DeviceActorMsgProcessor {
 
-    //cong之前的set改为map，键为sessionid，值为订阅次数（这里不确定短线重连是否会复用前一个绘话，如果会复用，那这样写没问题）
-    //如果不复用，这么些也没问题
-    private final Map<String,Integer> subscriptions;
-    private final  Map<Integer,DeferredResult<ResponseEntity>> rpcRequests;
-    private final ActorSystemContext actorSystemContext;
     static BASE64Encoder encoder = new sun.misc.BASE64Encoder();
     static BASE64Decoder decoder = new sun.misc.BASE64Decoder();
+    //cong之前的set改为map，键为sessionid，值为订阅次数（这里不确定短线重连是否会复用前一个绘话，如果会复用，那这样写没问题）
+    //如果不复用，这么些也没问题
+    private final Map<String, Integer> subscriptions;
+    private final Map<Integer, DeferredResult<ResponseEntity>> rpcRequests;
+    private final ActorSystemContext actorSystemContext;
 
-    public  DeviceActorMsgProcessor(ActorSystemContext actorSystemContext){
-        rpcRequests  = new HashMap<>();
+    public DeviceActorMsgProcessor(ActorSystemContext actorSystemContext) {
+        rpcRequests = new HashMap<>();
         subscriptions = new HashMap<>();
         this.actorSystemContext = actorSystemContext;
     }
 
-    public boolean jugeWhetherDie(SessionId id){
-        System.out.println("start to juge whether die nd session = " +id);
-        subscriptions.forEach((k,v) -> {
-            System.out.println(k+"=>"+v);
+    public boolean jugeWhetherDie(SessionId id) {
+        System.out.println("start to juge whether die nd session = " + id);
+        subscriptions.forEach((k, v) -> {
+            System.out.println(k + "=>" + v);
         });
-        if(subscriptions.isEmpty()){
+        if (subscriptions.isEmpty()) {
             return true;
         }
 
         String idstr = id.toUidStr();
 
-        if(!subscriptions.containsKey(idstr)){
+        if (!subscriptions.containsKey(idstr)) {
             return false;
         }
 
-        if(subscriptions.get(idstr)>1){
-            subscriptions.put(idstr,subscriptions.get(idstr)-1);
+        if (subscriptions.get(idstr) > 1) {
+            subscriptions.put(idstr, subscriptions.get(idstr) - 1);
             return false;
         }
 
         subscriptions.remove(idstr);
 
-        if(subscriptions.isEmpty()){
+        if (subscriptions.isEmpty()) {
             return true;
         }
 
@@ -79,76 +79,76 @@ public class DeviceActorMsgProcessor {
     }
 
     public void process(BasicToDeviceActorMsg msg) throws IOException {
-        BasicToDeviceActorMsg msg1 = (BasicToDeviceActorMsg)msg;
+        BasicToDeviceActorMsg msg1 = (BasicToDeviceActorMsg) msg;
         AdaptorToSessionActorMsg adptorMsg = msg1.getMsg();
         FromDeviceMsg fromDeviceMsg = adptorMsg.getMsg();
-        switch(fromDeviceMsg.getMsgType()){
+        switch (fromDeviceMsg.getMsgType()) {
             case MsgType.POST_TELEMETRY_REQUEST:
-                handleTelemetryUploadRequest((TelemetryUploadMsg)fromDeviceMsg, msg1);
+                handleTelemetryUploadRequest((TelemetryUploadMsg) fromDeviceMsg, msg1);
                 System.err.println("receive a telemetry msg");
                 break;
             case MsgType.POST_ATTRIBUTE_REQUEST:
-                handleAttributeUploadRequest((AttributeUploadMsg)fromDeviceMsg, msg1);
+                handleAttributeUploadRequest((AttributeUploadMsg) fromDeviceMsg, msg1);
                 System.err.println("receive a attribute msg");
                 break;
             case MsgType.FROM_DEVICE_RPC_SUB:
                 System.err.println("receive a rpc sub");
-                if(subscriptions.containsKey(adptorMsg.getSessionId().toUidStr())){
+                if (subscriptions.containsKey(adptorMsg.getSessionId().toUidStr())) {
                     String uidStr = adptorMsg.getSessionId().toUidStr();
-                    subscriptions.put(uidStr, subscriptions.get(uidStr)+1);
-                }else {
+                    subscriptions.put(uidStr, subscriptions.get(uidStr) + 1);
+                } else {
                     subscriptions.put(adptorMsg.getSessionId().toUidStr(), 1);
                 }
                 break;
             case MsgType.FROM_DEVICE_RPC_UNSUB:
                 System.err.println("receive a rpc unsub");
                 String uidStr = adptorMsg.getSessionId().toUidStr();
-                if(!subscriptions.containsKey(uidStr)){
+                if (!subscriptions.containsKey(uidStr)) {
                     break;
                 }
-                if(subscriptions.get(uidStr)<=1){
+                if (subscriptions.get(uidStr) <= 1) {
                     subscriptions.remove(uidStr);
-                }else{
-                    subscriptions.put(uidStr, subscriptions.get(uidStr)-1);
+                } else {
+                    subscriptions.put(uidStr, subscriptions.get(uidStr) - 1);
                 }
                 break;
             case MsgType.FROM_DEVICE_RPC_RESPONSE:
                 System.err.println("receive a rpc  response");
-                int requestId = ((FromDeviceRpcResponse)fromDeviceMsg).getRequestId();
+                int requestId = ((FromDeviceRpcResponse) fromDeviceMsg).getRequestId();
                 DeferredResult result = rpcRequests.get(requestId);
-                if(result == null){
+                if (result == null) {
                     //TODO 记录一下rpc超时
-                }else{
-                    result.setResult(((FromDeviceRpcResponse)fromDeviceMsg).getData());
+                } else {
+                    result.setResult(((FromDeviceRpcResponse) fromDeviceMsg).getData());
                     rpcRequests.remove(requestId);
                 }
                 break;
-            default:{
+            default: {
                 System.err.println("unKnow msg type");
-                }
+            }
         }
     }
 
     public void process(FromServerMsg msg) {
-        if(msg.getMsgType().equals(MsgType.FROM_SERVER_RPC_MSG)){
-            BasicFromServerRpcMsg msg1 = (BasicFromServerRpcMsg)(msg);
+        if (msg.getMsgType().equals(MsgType.FROM_SERVER_RPC_MSG)) {
+            BasicFromServerRpcMsg msg1 = (BasicFromServerRpcMsg) (msg);
             int requestId = msg1.getRpcRequestId();
-            if(msg1.requireResponse()){
-                rpcRequests.put(requestId,msg1.getRes());
-                msg1.getRes().onTimeout(()->{
+            if (msg1.requireResponse()) {
+                rpcRequests.put(requestId, msg1.getRes());
+                msg1.getRes().onTimeout(() -> {
                     rpcRequests.remove(requestId);
                 });
-                subscriptions.keySet().forEach(sessionId->{
+                subscriptions.keySet().forEach(sessionId -> {
                     actorSystemContext.getSessionManagerActor().tell(
-                            new BasicFromDeviceActorRpc(sessionId,msg1.getDevice(),msg1),
+                            new BasicFromDeviceActorRpc(sessionId, msg1.getDevice(), msg1),
                             ActorRef.noSender()
                     );
                 });
-            }else{
+            } else {
                 msg1.getRes().setResult(new ResponseEntity(HttpStatus.OK));
-                subscriptions.keySet().forEach(sessionId->{
+                subscriptions.keySet().forEach(sessionId -> {
                     actorSystemContext.getSessionManagerActor().tell(
-                            new BasicFromDeviceActorRpc(sessionId,msg1.getDevice(),msg1),
+                            new BasicFromDeviceActorRpc(sessionId, msg1.getDevice(), msg1),
                             ActorRef.noSender()
                     );
                 });
@@ -157,28 +157,28 @@ public class DeviceActorMsgProcessor {
     }
 
 
-     public void handleTelemetryUploadRequest(TelemetryUploadMsg msg, BasicToDeviceActorMsg msg1) throws IOException {
+    public void handleTelemetryUploadRequest(TelemetryUploadMsg msg, BasicToDeviceActorMsg msg1) throws IOException {
         Map<Long, List<cn.edu.bupt.common.entry.KvEntry>> data = msg.getData();
 
-        for( long ts : data.keySet()){
+        for (long ts : data.keySet()) {
             UUID entityId = UUID.fromString(msg1.getDeviceId());
             List<cn.edu.bupt.common.entry.KvEntry> KvEntry = data.get(ts);
             List<TsKvEntry> ls = new ArrayList<>();
-            for(cn.edu.bupt.common.entry.KvEntry en : KvEntry){
-                if(en.getKey().equals("picture")){
-                    if(en instanceof StringEntry){
+            for (cn.edu.bupt.common.entry.KvEntry en : KvEntry) {
+                if (en.getKey().equals("picture")) {
+                    if (en instanceof StringEntry) {
                         // 图片二进制转为图片，将路径存入
                         //String[] pathWords = {"root", "iot", "treatment", "img"} ;
-                        String[] pathWords = {"D:\\pic", "oup"} ;
+                        String[] pathWords = {"D:\\pic", "oup"};
                         String path = String.join(File.separator, Arrays.asList(pathWords));
-                        String pathname = path +"\\" + System.currentTimeMillis() +".jpg";
+                        String pathname = path + "\\" + System.currentTimeMillis() + ".jpg";
                         BufferedImage img = BinaryToImage(en.getValueAsString());
                         saveImage(img, pathname);
                         //设置路径存入
                         ((StringEntry) en).setValue(pathname);
                         ls.add(new BasicAdaptorTsKvEntry(ts, en));
                     }
-                }else{
+                } else {
                     ls.add(new BasicAdaptorTsKvEntry(ts, en));
                 }
             }
@@ -188,68 +188,67 @@ public class DeviceActorMsgProcessor {
             BaseTimeseriesService baseTimeseriesService = actorSystemContext.getBaseTimeseriesService();
             baseTimeseriesService.save(entityId, ls, 0);
         }
-        sendDataToKafka(msg1.getDevice(),data);
+        sendDataToKafka(msg1.getDevice(), data);
     }
 
 
-    public void handleAttributeUploadRequest(AttributeUploadMsg msg, BasicToDeviceActorMsg msg1){
+    public void handleAttributeUploadRequest(AttributeUploadMsg msg, BasicToDeviceActorMsg msg1) {
         Set<cn.edu.bupt.common.entry.KvEntry> atts = msg.getData();
         List<AttributeKvEntry> attributes = new ArrayList<>();
-        atts.forEach(entry->{
-            attributes.add(new BasicAdaptorAttributeKvEntry(entry,((BasicAttributeKvEntry)entry).getLastUpdateTs()));
+        atts.forEach(entry -> {
+            attributes.add(new BasicAdaptorAttributeKvEntry(entry, ((BasicAttributeKvEntry) entry).getLastUpdateTs()));
         });
         UUID entityId = UUID.fromString(msg1.getDeviceId());
         BaseAttributesService baseAttributesService = actorSystemContext.getBaseAttributesService();
         baseAttributesService.save(entityId, attributes);
     }
 
-    private void sendDataToKafka(Device device,Map<Long, List<cn.edu.bupt.common.entry.KvEntry>> data) throws IOException {
-        JsonObject obj =  new JsonObject();
-        obj.addProperty("deviceId",device.getId().toString());
-        obj.addProperty("tenantId",device.getTenantId());
-        obj.addProperty("name",device.getName());
-        obj.addProperty("manufacture",device.getManufacture());
-        obj.addProperty("deviceType",device.getDeviceType());
-        obj.addProperty("model",device.getModel());
+    private void sendDataToKafka(Device device, Map<Long, List<cn.edu.bupt.common.entry.KvEntry>> data) throws IOException {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("deviceId", device.getId().toString());
+        obj.addProperty("tenantId", device.getTenantId());
+        obj.addProperty("name", device.getName());
+        obj.addProperty("manufacture", device.getManufacture());
+        obj.addProperty("deviceType", device.getDeviceType());
+        obj.addProperty("model", device.getModel());
         JsonArray array = new JsonArray();
-        for(Map.Entry<Long,List<cn.edu.bupt.common.entry.KvEntry>> entry:data.entrySet()){
+        for (Map.Entry<Long, List<cn.edu.bupt.common.entry.KvEntry>> entry : data.entrySet()) {
             long ts = entry.getKey();
-            for(cn.edu.bupt.common.entry.KvEntry en:entry.getValue()){
+            for (cn.edu.bupt.common.entry.KvEntry en : entry.getValue()) {
                 JsonObject temp = new JsonObject();
-                temp.addProperty("ts",ts);
-                temp.addProperty("key",en.getKey());
-                switch(en.getDataType()){
+                temp.addProperty("ts", ts);
+                temp.addProperty("key", en.getKey());
+                switch (en.getDataType()) {
                     case "string":
-                        temp.addProperty("value",en.getStrValue().get());
+                        temp.addProperty("value", en.getStrValue().get());
                         break;
                     case "boolean":
-                        temp.addProperty("value",en.getBooleanValue().get());
+                        temp.addProperty("value", en.getBooleanValue().get());
                         break;
                     case "long":
-                        temp.addProperty("value",en.getLongValue().get());
+                        temp.addProperty("value", en.getLongValue().get());
                         break;
                     case "double":
-                        temp.addProperty("value",en.getDoubleValue().get());
+                        temp.addProperty("value", en.getDoubleValue().get());
                         break;
                 }
                 array.add(temp);
             }
         }
-        obj.add("data",array);
+        obj.add("data", array);
 
         //System.out.println(actorSystemContext.getWebSocketServer().map);
-        if(actorSystemContext.getWebSocketServer().map.containsKey(device.getId().toString())) {
-            for(Session session : actorSystemContext.getWebSocketServer().map.get(device.getId().toString()) )
-                actorSystemContext.getWebSocketServer().sendMessage(obj.toString(),session);
+        if (actorSystemContext.getWebSocketServer().map.containsKey(device.getId().toString())) {
+            for (Session session : actorSystemContext.getWebSocketServer().map.get(device.getId().toString()))
+                actorSystemContext.getWebSocketServer().sendMessage(obj.toString(), session);
         }
 
-        KafkaUtil.send("",obj.toString());
+        KafkaUtil.send("", obj.toString());
     }
 
 
-
     public BufferedImage BinaryToImage(String binary) {
-        try{
+        try {
             byte[] bytes1 = decoder.decodeBuffer(binary);
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes1);
             BufferedImage image = ImageIO.read(bais);
@@ -262,10 +261,8 @@ public class DeviceActorMsgProcessor {
 
     public void saveImage(BufferedImage bufferedImage, String pathname) throws IOException {
 
-        ImageIO.write(bufferedImage,"jpg", new File(pathname));
+        ImageIO.write(bufferedImage, "jpg", new File(pathname));
     }
-
-
 
 
 }

@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Configuration
-public class ThroughFilter implements Filter{
+public class ThroughFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
 

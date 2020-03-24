@@ -19,10 +19,25 @@ import java.util.UUID;
  * Created by CZX on 2018/4/24.
  */
 @Service
-public class BaseAttributesService implements AttributesService{
+public class BaseAttributesService implements AttributesService {
 
     @Autowired
     private AttributesDao attributesDao;
+
+    private static void validate(UUID id) {
+        Validator.validateId(id, "Incorrect id " + id);
+    }
+
+    private static void validate(AttributeKvEntry kvEntry) {
+        if (kvEntry == null) {
+            throw new IncorrectParameterException("Key value entry can't be null");
+        } else if (kvEntry.getDataType() == null) {
+            throw new IncorrectParameterException("Incorrect kvEntry. Data type can't be null");
+        } else {
+            Validator.validateString(kvEntry.getKey(), "Incorrect kvEntry. Key can't be empty");
+            Validator.validatePositiveNumber(kvEntry.getLastUpdateTs(), "Incorrect last update ts. Ts should be positive");
+        }
+    }
 
     @Override
     public ListenableFuture<Optional<AttributeKvEntry>> find(UUID entityId, String attributeKey) {
@@ -58,22 +73,7 @@ public class BaseAttributesService implements AttributesService{
     @Override
     public ListenableFuture<List<Void>> removeAll(UUID entityId, List<String> keys) {
         validate(entityId);
-        return attributesDao.removeAll(entityId,keys);
-    }
-
-    private static void validate(UUID id) {
-        Validator.validateId(id, "Incorrect id " + id);
-    }
-
-    private static void validate(AttributeKvEntry kvEntry) {
-        if (kvEntry == null) {
-            throw new IncorrectParameterException("Key value entry can't be null");
-        } else if (kvEntry.getDataType() == null) {
-            throw new IncorrectParameterException("Incorrect kvEntry. Data type can't be null");
-        } else {
-            Validator.validateString(kvEntry.getKey(), "Incorrect kvEntry. Key can't be empty");
-            Validator.validatePositiveNumber(kvEntry.getLastUpdateTs(), "Incorrect last update ts. Ts should be positive");
-        }
+        return attributesDao.removeAll(entityId, keys);
     }
 
 }

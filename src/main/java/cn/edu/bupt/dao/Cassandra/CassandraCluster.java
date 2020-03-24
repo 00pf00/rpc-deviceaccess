@@ -51,7 +51,8 @@ public class CassandraCluster {
 
     private Cluster cluster;
 
-    @Getter(AccessLevel.NONE) private Session session;
+    @Getter(AccessLevel.NONE)
+    private Session session;
 
     private MappingManager mappingManager;
 

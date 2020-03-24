@@ -10,19 +10,19 @@ public class DeviceAuthResult {
     private final String deviceId;
     private final String errorMsg;
 
-    public static DeviceAuthResult of(boolean success,String deviceId,String errormsg) {
-        return new DeviceAuthResult(success, deviceId, errormsg);
+    private DeviceAuthResult(boolean success, String deviceId, String errorMsg) {
+        super();
+        this.success = success;
+        this.deviceId = deviceId;
+        this.errorMsg = errorMsg;
     }
 
 //   public static DeviceAuthResult of(String errorMsg) {
 //        return new DeviceAuthResult(false, null, errorMsg);
 //    }
 
-    private DeviceAuthResult(boolean success, String deviceId, String errorMsg) {
-        super();
-        this.success = success;
-        this.deviceId = deviceId;
-        this.errorMsg = errorMsg;
+    public static DeviceAuthResult of(boolean success, String deviceId, String errormsg) {
+        return new DeviceAuthResult(success, deviceId, errormsg);
     }
 
     public boolean isSuccess() {

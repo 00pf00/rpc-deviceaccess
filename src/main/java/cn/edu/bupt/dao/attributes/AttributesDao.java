@@ -13,13 +13,13 @@ import java.util.UUID;
  */
 public interface AttributesDao {
 
-    ListenableFuture<Optional<AttributeKvEntry>> find(UUID entityId,String attributeKey);
+    ListenableFuture<Optional<AttributeKvEntry>> find(UUID entityId, String attributeKey);
 
     ListenableFuture<List<AttributeKvEntry>> find(UUID entityId, Collection<String> attributeKey);
 
     ListenableFuture<List<AttributeKvEntry>> findAll(UUID entityId);
 
-    ListenableFuture<Void> save(UUID entityId,AttributeKvEntry attribute);
+    ListenableFuture<Void> save(UUID entityId, AttributeKvEntry attribute);
 
     ListenableFuture<List<Void>> removeAll(UUID entityId, List<String> keys);
 

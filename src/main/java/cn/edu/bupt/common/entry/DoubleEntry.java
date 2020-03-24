@@ -8,9 +8,9 @@ import java.util.Optional;
  * Created by Administrator on 2018/4/14.
  */
 public class DoubleEntry extends BasicTelemetryKvEntry {
-    private final Double value ;
+    private final Double value;
 
-    public DoubleEntry(String key,double value){
+    public DoubleEntry(String key, double value) {
         super(key);
         this.value = value;
     }

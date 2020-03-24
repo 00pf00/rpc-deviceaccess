@@ -23,12 +23,26 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 @Service
 @Slf4j
-public class BaseTimeseriesService implements TimeseriesService{
+public class BaseTimeseriesService implements TimeseriesService {
 
     public static final int INSERTS_PER_ENTRY = 3;
 
     @Autowired
     private TimeseriesDao timeseriesDao;
+
+    private static void validate(UUID entityId) {
+        Validator.validateEntityId(entityId, "Incorrect entityId " + entityId);
+    }
+
+    private static void validate(TsKvQuery query) {
+        if (query == null) {
+            throw new IncorrectParameterException("TsKvQuery can't be null");
+        } else if (isBlank(query.getKey())) {
+            throw new IncorrectParameterException("Incorrect TsKvQuery. Key can't be empty");
+        } else if (query.getAggregation() == null) {
+            throw new IncorrectParameterException("Incorrect TsKvQuery. Aggregation can't be empty");
+        }
+    }
 
     @Override
     public ListenableFuture<List<TsKvEntry>> findAll(UUID entityId, List<TsKvQuery> queries) {
@@ -85,19 +99,5 @@ public class BaseTimeseriesService implements TimeseriesService{
         futures.add(timeseriesDao.savePartition(entityId, tsKvEntry.getTs(), tsKvEntry.getKey(), ttl));
         futures.add(timeseriesDao.saveLatest(entityId, tsKvEntry));
         futures.add(timeseriesDao.save(entityId, tsKvEntry, ttl));
-    }
-
-    private static void validate(UUID entityId) {
-        Validator.validateEntityId(entityId, "Incorrect entityId " + entityId);
-    }
-
-    private static void validate(TsKvQuery query) {
-        if (query == null) {
-            throw new IncorrectParameterException("TsKvQuery can't be null");
-        } else if (isBlank(query.getKey())) {
-            throw new IncorrectParameterException("Incorrect TsKvQuery. Key can't be empty");
-        } else if (query.getAggregation() == null) {
-            throw new IncorrectParameterException("Incorrect TsKvQuery. Aggregation can't be empty");
-        }
     }
 }

@@ -22,7 +22,7 @@ public class GroupController extends BaseController {
     //设备层面的设备组
     //获取设备组下的所有设备
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'getDevicesByGroupId')")
-    @RequestMapping(value = "/group/devices/{groupId}",params = {"limit"}, method = RequestMethod.GET)
+    @RequestMapping(value = "/group/devices/{groupId}", params = {"limit"}, method = RequestMethod.GET)
     public TextPageData<Device> getDevicesByGroupId(
             @PathVariable(GROUP_ID) String strGroupId,
             @RequestParam int limit,
@@ -36,11 +36,11 @@ public class GroupController extends BaseController {
             e.printStackTrace();
             return null;
         }
-        try{
-            TextPageLink pageLink = new TextPageLink(limit, textSearch, idOffset==null?null:toUUID(idOffset), textOffset);
+        try {
+            TextPageLink pageLink = new TextPageLink(limit, textSearch, idOffset == null ? null : toUUID(idOffset), textOffset);
             TextPageData<Device> devices = deviceService.findDevicesByGroupId(toUUID(strGroupId), pageLink);
             return devices;
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -49,12 +49,12 @@ public class GroupController extends BaseController {
     //分配设备到设备组
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'assignDeviceToGroup')")
     @RequestMapping(value = "/assign/group/{groupId}/{deviceId}", method = RequestMethod.GET)
-    public void assignDeviceToGroup(@PathVariable(GROUP_ID) String groupId, @PathVariable(DEVICE_ID) String deviceId) throws Exception{
-        try{
-            deviceService.assignDeviceToGroup(UUID.fromString(deviceId),UUID.fromString(groupId));
-        }catch(Exception e){
+    public void assignDeviceToGroup(@PathVariable(GROUP_ID) String groupId, @PathVariable(DEVICE_ID) String deviceId) throws Exception {
+        try {
+            deviceService.assignDeviceToGroup(UUID.fromString(deviceId), UUID.fromString(groupId));
+        } catch (Exception e) {
             e.printStackTrace();
-            return ;
+            return;
         }
     }
 
@@ -62,12 +62,12 @@ public class GroupController extends BaseController {
     //从设备组取消分配所有设备
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'unassignDevicesFromGroup')")
     @RequestMapping(value = "/unassign/group/{groupId}", method = RequestMethod.DELETE)
-    public void unassignDevicesFromGroup(@PathVariable(GROUP_ID) String groupId) throws Exception{
-        try{
+    public void unassignDevicesFromGroup(@PathVariable(GROUP_ID) String groupId) throws Exception {
+        try {
             deviceService.unassignDevicesByGroupId(UUID.fromString(groupId));
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            return ;
+            return;
         }
     }
 
@@ -75,12 +75,12 @@ public class GroupController extends BaseController {
     //从设备组取消分配某一个设备
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'unassignDeviceByGroupId')")
     @RequestMapping(value = "/unassign/group/{groupId}/{deviceId}", method = RequestMethod.DELETE)
-    public void unassignDeviceByGroupId(@PathVariable(GROUP_ID) String groupId, @PathVariable(DEVICE_ID) String deviceId) throws Exception{
-        try{
-            deviceService.unassignDeviceFromGroup(UUID.fromString(deviceId),UUID.fromString(groupId));
-        }catch(Exception e){
+    public void unassignDeviceByGroupId(@PathVariable(GROUP_ID) String groupId, @PathVariable(DEVICE_ID) String deviceId) throws Exception {
+        try {
+            deviceService.unassignDeviceFromGroup(UUID.fromString(deviceId), UUID.fromString(groupId));
+        } catch (Exception e) {
             e.printStackTrace();
-            return ;
+            return;
         }
     }
 
@@ -89,7 +89,7 @@ public class GroupController extends BaseController {
     //创建
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'saveGroup')")
     @RequestMapping(value = "/group", method = RequestMethod.POST)
-    public String saveGroup(@RequestBody String group) throws Exception{
+    public String saveGroup(@RequestBody String group) throws Exception {
 
         //表单转变为json提交
         try {
@@ -105,33 +105,33 @@ public class GroupController extends BaseController {
     //删除
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'deleteGroup')")
     @RequestMapping(value = "/group/{groupId}", method = RequestMethod.DELETE)
-    public void deleteGroup(@PathVariable(GROUP_ID) String strGroupId) throws Exception{
-        if(StringUtil.isEmpty(strGroupId)){
-          return ;
+    public void deleteGroup(@PathVariable(GROUP_ID) String strGroupId) throws Exception {
+        if (StringUtil.isEmpty(strGroupId)) {
+            return;
         }
-        try{
+        try {
             groupService.deleteGroup(toUUID(strGroupId));
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            return ;
+            return;
         }
     }
 
     //查找所有设备组
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'getGroupsByTenantId')")
-    @RequestMapping(value = "/groups/tenant/{tenantId}",params = {"limit"}, method = RequestMethod.GET)
+    @RequestMapping(value = "/groups/tenant/{tenantId}", params = {"limit"}, method = RequestMethod.GET)
     public TextPageData<Group> getGroupsByTenantId(
             @PathVariable("tenantId") Integer tenantId,
             @RequestParam int limit,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String textSearch,
             @RequestParam(required = false) String idOffset,
-            @RequestParam(required = false) String textOffset) throws Exception{
-        try{
-            TextPageLink pageLink = new TextPageLink(limit, textSearch, idOffset==null?null:toUUID(idOffset), textOffset);
+            @RequestParam(required = false) String textOffset) throws Exception {
+        try {
+            TextPageLink pageLink = new TextPageLink(limit, textSearch, idOffset == null ? null : toUUID(idOffset), textOffset);
             TextPageData<Group> tenantgroups = groupService.findGroupsByTenantId(tenantId, pageLink);
             return tenantgroups;
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -139,19 +139,19 @@ public class GroupController extends BaseController {
 
     //获取客户管理的所有设备组
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'getGroupsByCustomerId')")
-    @RequestMapping(value = "/groups/customer/{customerId}",params = {"limit"}, method = RequestMethod.GET)
+    @RequestMapping(value = "/groups/customer/{customerId}", params = {"limit"}, method = RequestMethod.GET)
     public TextPageData<Group> getGroupsByCustomerId(
             @PathVariable("customerId") Integer customerId,
             @RequestParam int limit,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String textSearch,
             @RequestParam(required = false) String idOffset,
-            @RequestParam(required = false) String textOffset) throws Exception{
-        try{
-            TextPageLink pageLink = new TextPageLink(limit, textSearch, idOffset==null?null:toUUID(idOffset), textOffset);
+            @RequestParam(required = false) String textOffset) throws Exception {
+        try {
+            TextPageLink pageLink = new TextPageLink(limit, textSearch, idOffset == null ? null : toUUID(idOffset), textOffset);
             TextPageData<Group> customergroups = groupService.findGroupsByCustomerId(customerId, pageLink);
             return customergroups;
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -160,7 +160,7 @@ public class GroupController extends BaseController {
     //通过tenant和customer找group
     //permission同上
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'getGroupsByCustomerId')")
-    @RequestMapping(value = "/groups/{tenantId}/{customerId}",params = {"limit"}, method = RequestMethod.GET)
+    @RequestMapping(value = "/groups/{tenantId}/{customerId}", params = {"limit"}, method = RequestMethod.GET)
     public TextPageData<Group> getGroupsByTenantIdAndCustomerId(
             @PathVariable("tenantId") Integer tenantId,
             @PathVariable("customerId") Integer customerId,
@@ -168,18 +168,16 @@ public class GroupController extends BaseController {
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String textSearch,
             @RequestParam(required = false) String idOffset,
-            @RequestParam(required = false) String textOffset) throws Exception{
-        try{
-            TextPageLink pageLink = new TextPageLink(limit, textSearch, idOffset==null?null:toUUID(idOffset), textOffset);
+            @RequestParam(required = false) String textOffset) throws Exception {
+        try {
+            TextPageLink pageLink = new TextPageLink(limit, textSearch, idOffset == null ? null : toUUID(idOffset), textOffset);
             TextPageData<Group> customergroups = groupService.findGroupsByTenantIdAndCustomerId(tenantId, customerId, pageLink);
             return customergroups;
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
-
-
 
 
 }

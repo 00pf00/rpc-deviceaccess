@@ -17,11 +17,11 @@ public class MyPermissionEvaluator implements PermissionEvaluator {
         SecurityUser securityUser = null;
         try {
             securityUser = (SecurityUser) authentication.getPrincipal();
-        }catch(Exception e){
+        } catch (Exception e) {
             return false;
         }
         Collection<String> permissions = securityUser.getPermissions();
-        if(permissions.contains(requiredPermission)){
+        if (permissions.contains(requiredPermission)) {
             return true;
         }
         return false;

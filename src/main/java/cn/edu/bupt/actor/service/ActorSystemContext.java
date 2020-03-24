@@ -19,27 +19,26 @@ import org.springframework.stereotype.Component;
 public class ActorSystemContext {
 
     private static final String AKKA_CONF_FILE_NAME = "actor-system.conf";
+    @Getter
+    private final Config config;
     @Autowired
     @Getter
     private DeviceAuthService deviceAuthService;
-
     @Autowired
-    @Getter private DeviceService deviceService;
-
+    @Getter
+    private DeviceService deviceService;
     @Autowired
-    @Getter private BaseTimeseriesService baseTimeseriesService;
-
+    @Getter
+    private BaseTimeseriesService baseTimeseriesService;
     @Autowired
-    @Getter private BaseAttributesService baseAttributesService;
-
+    @Getter
+    private BaseAttributesService baseAttributesService;
     @Autowired
-    @Getter private BaseEventService baseEventService;
-
+    @Getter
+    private BaseEventService baseEventService;
     @Autowired
-    @Getter private WebSocketServer webSocketServer;
-
-    @Autowired
-    @Getter private ModelService modelService;
+    @Getter
+    private WebSocketServer webSocketServer;
 
 //    @Autowired
 //    @Getter private TenantService tenantService;
@@ -49,16 +48,20 @@ public class ActorSystemContext {
 //
 //    @Autowired
 //    @Getter private AttributesService attributesService;
-
-    @Getter @Setter
+    @Autowired
+    @Getter
+    private ModelService modelService;
+    @Getter
+    @Setter
     private ActorSystem actorSystem;
+    @Getter
+    @Setter
+    private ActorRef appActor;
+    @Getter
+    @Setter
+    private ActorRef sessionManagerActor;
 
-    @Getter @Setter private ActorRef appActor;
-    @Getter @Setter private ActorRef sessionManagerActor;
-
-    @Getter private final Config config;
-
-    public ActorSystemContext(){
+    public ActorSystemContext() {
         config = ConfigFactory.parseResources(AKKA_CONF_FILE_NAME).withFallback(ConfigFactory.load());
     }
 

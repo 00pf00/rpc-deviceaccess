@@ -10,10 +10,11 @@ import java.util.Optional;
 public class LongEntry extends BasicTelemetryKvEntry {
     private final Long value;
 
-    public LongEntry(String key,long value){
+    public LongEntry(String key, long value) {
         super(key);
         this.value = value;
     }
+
     @Override
     public Optional<Long> getLongValue() {
         return Optional.ofNullable(value);
@@ -25,7 +26,7 @@ public class LongEntry extends BasicTelemetryKvEntry {
     }
 
     @Override
-    public String getValueAsString(){
+    public String getValueAsString() {
         return Long.toString(value);
     }
 

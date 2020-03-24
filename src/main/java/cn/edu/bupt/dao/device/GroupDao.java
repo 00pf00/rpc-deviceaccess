@@ -6,7 +6,6 @@ import cn.edu.bupt.pojo.Group;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Created by CZX on 2018/4/18.
@@ -30,7 +29,7 @@ public interface GroupDao extends Dao<Group> {
      */
     List<Group> findGroupsByTenantId(Integer tenantId, TextPageLink pageLink);
 
-    List<Group> findGroupsByTenantIdAndCustomerId(Integer tenantId, Integer customerId, TextPageLink pageLink) ;
+    List<Group> findGroupsByTenantIdAndCustomerId(Integer tenantId, Integer customerId, TextPageLink pageLink);
 
     List<Group> findGroupsByCustomerId(Integer customerId, TextPageLink pageLink);
 

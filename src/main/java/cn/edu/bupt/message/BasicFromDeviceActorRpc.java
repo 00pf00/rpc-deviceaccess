@@ -3,17 +3,16 @@ package cn.edu.bupt.message;
 import cn.edu.bupt.common.SessionId;
 import cn.edu.bupt.pojo.Device;
 import cn.edu.bupt.transport.mqtt.session.MqttSessionId;
-import lombok.Getter;
 
 /**
  * Created by Administrator on 2018/4/25.
  */
 public class BasicFromDeviceActorRpc implements FromDeviceActorToSessionActorMsg {
-    private final String  sessionId;
+    private final String sessionId;
     private final Device device;
     private final FromServerRpcMsg fromServerRpcMsg;
 
-    public BasicFromDeviceActorRpc(String sessionId,Device device,FromServerRpcMsg fromServerRpcMsg){
+    public BasicFromDeviceActorRpc(String sessionId, Device device, FromServerRpcMsg fromServerRpcMsg) {
         this.sessionId = sessionId;
         this.device = device;
         this.fromServerRpcMsg = fromServerRpcMsg;
@@ -26,7 +25,7 @@ public class BasicFromDeviceActorRpc implements FromDeviceActorToSessionActorMsg
 
     @Override
     public String getTenantId() {
-        return device.getTenantId()+"";
+        return device.getTenantId() + "";
     }
 
     @Override

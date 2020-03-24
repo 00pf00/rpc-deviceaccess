@@ -14,5 +14,5 @@ public interface ModelMapper {
             "AND manufacturer.manufacturer_id = model.manufacturer_id " +
             "AND manufacturer.manufacturer_name = #{manufacturer_name} " +
             "AND model.model_name = #{model_name}")
-    Model getModel (@Param("manufacturer_name")String manufacturer_name, @Param("device_type_name")String device_type_name, @Param("model_name")String model_name);
+    Model getModel(@Param("manufacturer_name") String manufacturer_name, @Param("device_type_name") String device_type_name, @Param("model_name") String model_name);
 }

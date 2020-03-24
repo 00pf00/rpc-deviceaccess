@@ -1,6 +1,7 @@
 package cn.edu.bupt.dao.attributes;
 
 import cn.edu.bupt.dao.Cassandra.CassandraAbstractAsyncDao;
+import cn.edu.bupt.dao.ModelConstants;
 import cn.edu.bupt.dao.timeseries.CassandraBaseTimeseriesDao;
 import cn.edu.bupt.pojo.kv.AttributeKvEntry;
 import cn.edu.bupt.pojo.kv.BaseAttributeKvEntry;
@@ -12,7 +13,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import cn.edu.bupt.dao.ModelConstants;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -28,7 +28,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
  */
 @Component
 @Slf4j
-public class CassandraBaseAttributesDao extends CassandraAbstractAsyncDao implements AttributesDao{
+public class CassandraBaseAttributesDao extends CassandraAbstractAsyncDao implements AttributesDao {
 
     private PreparedStatement saveStmt;
 

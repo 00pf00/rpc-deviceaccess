@@ -9,11 +9,12 @@ import com.datastax.driver.mapping.annotations.Table;
 import java.util.UUID;
 
 import static cn.edu.bupt.dao.ModelConstants.*;
+
 /**
  * Created by CZX on 2018/4/17.
  */
 @Table(name = DEVICE_CREDENTIALS_COLUMN_FAMILY_NAME)
-public class DeviceCredentials extends SearchTextBased implements BaseEntity{
+public class DeviceCredentials extends SearchTextBased implements BaseEntity {
 
     @PartitionKey(value = 0)
     @Column(name = ID_PROPERTY)
@@ -22,10 +23,10 @@ public class DeviceCredentials extends SearchTextBased implements BaseEntity{
     @Column(name = DEVICE_CREDENTIALS_DEVICE_ID_PROPERTY)
     private UUID deviceId;
 
-    @Column(name = DEVICE_CREDENTIALS_TOKEN_PROPERTY )
+    @Column(name = DEVICE_CREDENTIALS_TOKEN_PROPERTY)
     private String deviceToken;
 
-    @Column(name  = DEVICE_CREDENTIALS_SUSPENDED_PROPERTY )
+    @Column(name = DEVICE_CREDENTIALS_SUSPENDED_PROPERTY)
     private Boolean suspended = Boolean.FALSE;
 
     @Override
@@ -70,7 +71,7 @@ public class DeviceCredentials extends SearchTextBased implements BaseEntity{
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
         sb.append("\"id\":")
-                .append("\""+id+"\"");
+                .append("\"" + id + "\"");
         sb.append(",\"deviceId\":")
                 .append(deviceId);
         sb.append(",\"deviceToken\":\"")

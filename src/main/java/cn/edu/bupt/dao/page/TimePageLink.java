@@ -18,8 +18,10 @@ public class TimePageLink extends BasePageLink implements Serializable {
 
     @Getter
     private final Long startTime;
-    @Getter private final Long endTime;
-    @Getter private final boolean ascOrder;
+    @Getter
+    private final Long endTime;
+    @Getter
+    private final boolean ascOrder;
 
     public TimePageLink(int limit) {
         this(limit, null, null, false, null);

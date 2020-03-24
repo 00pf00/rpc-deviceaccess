@@ -9,7 +9,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 /**
  * Created by Administrator on 2018/4/24.
  */
-public class BasicFromServerRpcMsg  implements FromServerRpcMsg{
+public class BasicFromServerRpcMsg implements FromServerRpcMsg {
 
     private final int requestId;
     private final String data;
@@ -21,13 +21,13 @@ public class BasicFromServerRpcMsg  implements FromServerRpcMsg{
     private final JsonObject service;
 
 
-   public  BasicFromServerRpcMsg(int id,String data,Device device,DeferredResult<ResponseEntity> res,JsonObject service){
+    public BasicFromServerRpcMsg(int id, String data, Device device, DeferredResult<ResponseEntity> res, JsonObject service) {
         this.requestId = id;
         this.data = data;
         this.device = device;
         this.res = res;
         this.service = service;
-   }
+    }
 
     @Override
     public String getDeviceId() {
@@ -50,15 +50,15 @@ public class BasicFromServerRpcMsg  implements FromServerRpcMsg{
 
     @Override
     public String getTenantId() {
-        return device.getTenantId()+"";
+        return device.getTenantId() + "";
     }
 
     @Override
     public boolean requireResponse() {
-       //TODO 需要根据情况更改
-        if (service.has("requireResponse")){
+        //TODO 需要根据情况更改
+        if (service.has("requireResponse")) {
             return service.getAsJsonPrimitive("requireResponse").getAsBoolean();
-        }else{
+        } else {
             return false;
         }
     }

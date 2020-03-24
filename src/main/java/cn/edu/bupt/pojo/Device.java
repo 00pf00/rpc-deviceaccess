@@ -16,7 +16,7 @@ import static cn.edu.bupt.dao.ModelConstants.*;
  * Created by Administrator on 2018/4/13.
  */
 @Table(name = DEVICE_COLUMN_FAMILY_NAME)
-public class Device extends SearchTextBased implements SearchTextEntity,Serializable {
+public class Device extends SearchTextBased implements SearchTextEntity, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -39,31 +39,31 @@ public class Device extends SearchTextBased implements SearchTextEntity,Serializ
     @Column(name = SEARCH_TEXT_PROPERTY)
     private String searchText;
 
-    @Column(name  = DEVICE_PARENT_DEVICE_ID_PROPERTY )
+    @Column(name = DEVICE_PARENT_DEVICE_ID_PROPERTY)
     private String parentDeviceId;
 
     @PartitionKey(value = 4)
-    @Column(name  = DEVICE_DEVICE_TYPE_PROPERTY)
+    @Column(name = DEVICE_DEVICE_TYPE_PROPERTY)
     private String deviceType; //设备
 
     @PartitionKey(value = 3)
-    @Column(name = DEVICE_MANUFACTURE_PROPERTY )
+    @Column(name = DEVICE_MANUFACTURE_PROPERTY)
     private String manufacture;//厂商
 
     @PartitionKey(value = 5)
-    @Column(name  = DEVICE_MODEL_PROPERTY )
+    @Column(name = DEVICE_MODEL_PROPERTY)
     private String model;//设备型号
 
-    @Column(name  = DEVICE_STATUS_PROPERTY )
+    @Column(name = DEVICE_STATUS_PROPERTY)
     private String status;//运行状态
 
-    @Column(name  = DEVICE_LOCATION_PROPERTY )
+    @Column(name = DEVICE_LOCATION_PROPERTY)
     private String location;
 
-    @Column(name  = DEVICE_SITE_ID_PROPERTY )
+    @Column(name = DEVICE_SITE_ID_PROPERTY)
     private Integer siteId;
 
-    @Column(name  = DEVICE_LIFE_TIME_PROPERTY )
+    @Column(name = DEVICE_LIFE_TIME_PROPERTY)
     private Long lifeTime;
 
 //    public Device(Device device) {
@@ -196,7 +196,7 @@ public class Device extends SearchTextBased implements SearchTextEntity,Serializ
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
         sb.append("\"id\":")
-                .append("\""+id+"\"");
+                .append("\"" + id + "\"");
         sb.append(",\"tenantId\":")
                 .append(tenantId);
         sb.append(",\"customerId\":")
@@ -269,9 +269,9 @@ public class Device extends SearchTextBased implements SearchTextEntity,Serializ
     }
 
     @Override
-    public long getCreatedTime(){
+    public long getCreatedTime() {
         Long createdTime = id.timestamp();
-        createdTime = createdTime/10000000L - 12219292800L;
+        createdTime = createdTime / 10000000L - 12219292800L;
         return createdTime;
     }
 }

@@ -17,25 +17,6 @@ public enum TsPartitionDate {
         this.truncateUnit = truncateUnit;
     }
 
-    public String getPattern() {
-        return pattern;
-    }
-
-    public TemporalUnit getTruncateUnit() {
-        return truncateUnit;
-    }
-
-    public LocalDateTime truncatedTo(LocalDateTime time) {
-        switch (this){
-            case MONTHS:
-                return time.truncatedTo(ChronoUnit.DAYS).withDayOfMonth(1);
-            case YEARS:
-                return time.truncatedTo(ChronoUnit.DAYS).withDayOfYear(1);
-            default:
-                return time.truncatedTo(truncateUnit);
-        }
-    }
-
     public static Optional<TsPartitionDate> parse(String name) {
         TsPartitionDate partition = null;
         if (name != null) {
@@ -47,5 +28,24 @@ public enum TsPartitionDate {
             }
         }
         return Optional.of(partition);
+    }
+
+    public String getPattern() {
+        return pattern;
+    }
+
+    public TemporalUnit getTruncateUnit() {
+        return truncateUnit;
+    }
+
+    public LocalDateTime truncatedTo(LocalDateTime time) {
+        switch (this) {
+            case MONTHS:
+                return time.truncatedTo(ChronoUnit.DAYS).withDayOfMonth(1);
+            case YEARS:
+                return time.truncatedTo(ChronoUnit.DAYS).withDayOfYear(1);
+            default:
+                return time.truncatedTo(truncateUnit);
+        }
     }
 }

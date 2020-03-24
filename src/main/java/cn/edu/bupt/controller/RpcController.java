@@ -23,7 +23,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/api/v1/deviceaccess/rpc")
-public class RpcController extends BaseController{
+public class RpcController extends BaseController {
 
     @Autowired
     RpcMsgProcessor rpcMsgProcessor;
@@ -34,22 +34,22 @@ public class RpcController extends BaseController{
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'sendRpcCommandToDevice')")
     @RequestMapping(value = "/{deviceId}/{requestId}", method = RequestMethod.POST)
     public DeferredResult<ResponseEntity> sendRpcCommandToDevice(@RequestBody String data, @PathVariable String deviceId,
-                                                                 @PathVariable int requestId)throws Exception{
+                                                                 @PathVariable int requestId) throws Exception {
         DeferredResult<ResponseEntity> res = new DeferredResult<>();
         Device device = deviceService.findDeviceById(UUID.fromString(deviceId));
-        if(device==null) {
+        if (device == null) {
             res.setResult(new ResponseEntity(HttpStatus.BAD_REQUEST));
             return res;
         }
-        JsonObject serviceObj = HttpUtil.getDeviceServiceDes(device.getManufacture(),device.getDeviceType(),
-                device.getModel(),new JsonParser().parse(data).getAsJsonObject().get("serviceName").getAsString());
-        String pid= device.getParentDeviceId();
+        JsonObject serviceObj = HttpUtil.getDeviceServiceDes(device.getManufacture(), device.getDeviceType(),
+                device.getModel(), new JsonParser().parse(data).getAsJsonObject().get("serviceName").getAsString());
+        String pid = device.getParentDeviceId();
         BasicFromServerRpcMsg msg;
-        if (pid==null||"".equals(pid)){
-            msg    = new BasicFromServerRpcMsg(requestId,data,device,res,serviceObj);
-        }else{
-            Device  pdevice = deviceService.findDeviceById(UUID.fromString(pid));
-            msg    = new BasicFromServerRpcMsg(requestId,data,pdevice,res,serviceObj);
+        if (pid == null || "".equals(pid)) {
+            msg = new BasicFromServerRpcMsg(requestId, data, device, res, serviceObj);
+        } else {
+            Device pdevice = deviceService.findDeviceById(UUID.fromString(pid));
+            msg = new BasicFromServerRpcMsg(requestId, data, pdevice, res, serviceObj);
         }
         rpcMsgProcessor.process(msg);
         Event event = new Event();
@@ -60,7 +60,7 @@ public class RpcController extends BaseController{
         event.setBody(data);
         event.setEventType("TestType");
         baseEventService.save(event);
-        deviceService.sendMessage(device,"对"+device.getName()+"设备进行了控制");
+        deviceService.sendMessage(device, "对" + device.getName() + "设备进行了控制");
         return res;
     }
 }

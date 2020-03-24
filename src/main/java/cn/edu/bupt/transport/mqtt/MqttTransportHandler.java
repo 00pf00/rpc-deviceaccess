@@ -1,14 +1,12 @@
 package cn.edu.bupt.transport.mqtt;
 
 import cn.edu.bupt.actor.service.SessionMsgProcessor;
-import cn.edu.bupt.common.SessionContext;
 import cn.edu.bupt.common.security.DeviceTokenCredentials;
 import cn.edu.bupt.message.AdaptorToSessionActorMsg;
 import cn.edu.bupt.message.BasicToDeviceActorMsg;
 import cn.edu.bupt.message.MsgType;
 import cn.edu.bupt.message.SessionCloseMsg;
 import cn.edu.bupt.service.DeviceAuthService;
-import cn.edu.bupt.service.DeviceCredentialsService;
 import cn.edu.bupt.service.DeviceService;
 import cn.edu.bupt.transport.AdaptorException;
 import cn.edu.bupt.transport.TransportAdaptor;
@@ -23,13 +21,9 @@ import io.netty.util.concurrent.GenericFutureListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_ACCEPTED;
-import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD;
-import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.CONNECTION_REFUSED_NOT_AUTHORIZED;
+import static io.netty.handler.codec.mqtt.MqttConnectReturnCode.*;
 import static io.netty.handler.codec.mqtt.MqttMessageType.PINGRESP;
-import static io.netty.handler.codec.mqtt.MqttQoS.AT_LEAST_ONCE;
-import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
-import static io.netty.handler.codec.mqtt.MqttQoS.FAILURE;
+import static io.netty.handler.codec.mqtt.MqttQoS.*;
 
 /**
  * Created by Administrator on 2018/4/13.
@@ -44,29 +38,29 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
     private DeviceSessionCtx deviceSessionCtx;
     private TransportAdaptor adaptor;
 
-    public MqttTransportHandler(SessionMsgProcessor processor, DeviceService deviceService, DeviceAuthService deviceCredentialsService ,TransportAdaptor adaptor){
+    public MqttTransportHandler(SessionMsgProcessor processor, DeviceService deviceService, DeviceAuthService deviceCredentialsService, TransportAdaptor adaptor) {
         this.processor = processor;
         this.deviceService = deviceService;
         this.deviceAuthService = deviceCredentialsService;
         this.adaptor = adaptor;
-        this.deviceSessionCtx = new DeviceSessionCtx(deviceCredentialsService,adaptor);
+        this.deviceSessionCtx = new DeviceSessionCtx(deviceCredentialsService, adaptor);
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx,Object msg){
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
-        if(msg instanceof MqttMessage){
-            processMqttMsg(ctx,(MqttMessage)msg);
+        if (msg instanceof MqttMessage) {
+            processMqttMsg(ctx, (MqttMessage) msg);
         }
     }
 
     private void processMqttMsg(ChannelHandlerContext ctx, MqttMessage msg) {
-        if(msg.fixedHeader() == null){
+        if (msg.fixedHeader() == null) {
             //TODO 输出异常连接消息
             processDisconnect(ctx);
-        }else{
+        } else {
             deviceSessionCtx.setChannelHandlerContext(ctx);
-            switch(msg.fixedHeader().messageType()){
+            switch (msg.fixedHeader().messageType()) {
                 case CONNECT:
                     processConnect(ctx, (MqttConnectMessage) msg);
                     break;
@@ -95,25 +89,25 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
         }
     }
 
-    private void processSubscribe(ChannelHandlerContext ctx, MqttSubscribeMessage msg){
-        if(!checkConnected(ctx)){
-            return ;
+    private void processSubscribe(ChannelHandlerContext ctx, MqttSubscribeMessage msg) {
+        if (!checkConnected(ctx)) {
+            return;
         }
         List<Integer> grantedQoSList = new ArrayList<>();
-        for(MqttTopicSubscription subscription : msg.payload().topicSubscriptions()){
+        for (MqttTopicSubscription subscription : msg.payload().topicSubscriptions()) {
             String topicName = subscription.topicName();
             MqttQoS reqQoS = subscription.qualityOfService();
-            try{
-                if(topicName.equals(MqttTopics.DEVICE_RPC_REQUESTS_SUB_TOPIC)){
-                    AdaptorToSessionActorMsg msg1 = adaptor.convertToActorMsg(deviceSessionCtx,MsgType.FROM_DEVICE_RPC_SUB,msg);
-                    processor.process(new BasicToDeviceActorMsg(msg1,deviceSessionCtx.getDevice()));
+            try {
+                if (topicName.equals(MqttTopics.DEVICE_RPC_REQUESTS_SUB_TOPIC)) {
+                    AdaptorToSessionActorMsg msg1 = adaptor.convertToActorMsg(deviceSessionCtx, MsgType.FROM_DEVICE_RPC_SUB, msg);
+                    processor.process(new BasicToDeviceActorMsg(msg1, deviceSessionCtx.getDevice()));
                     grantedQoSList.add(getMinSupportedQos(reqQoS));
                 }
-            }catch(Exception e){
+            } catch (Exception e) {
                 grantedQoSList.add(FAILURE.value());
             }
         }
-        ctx.writeAndFlush(MqttMsgFactory.createSubAckMessage(msg.variableHeader().messageId(),grantedQoSList));
+        ctx.writeAndFlush(MqttMsgFactory.createSubAckMessage(msg.variableHeader().messageId(), grantedQoSList));
     }
 
     private void processUnsubscribe(ChannelHandlerContext ctx, MqttUnsubscribeMessage mqttMsg) {
@@ -124,7 +118,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
             try {
                 if (topicName.equals(MqttTopics.DEVICE_RPC_REQUESTS_SUB_TOPIC)) {
                     AdaptorToSessionActorMsg msg = adaptor.convertToActorMsg(deviceSessionCtx, MsgType.FROM_DEVICE_RPC_UNSUB, mqttMsg);
-                    processor.process(new BasicToDeviceActorMsg(msg,deviceSessionCtx.getDevice()));
+                    processor.process(new BasicToDeviceActorMsg(msg, deviceSessionCtx.getDevice()));
                 }
             } catch (AdaptorException e) {
                 e.printStackTrace();
@@ -134,7 +128,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
     }
 
     private boolean checkConnected(ChannelHandlerContext ctx) {
-        if(connected)
+        if (connected)
             return true;
         else
             ctx.close();
@@ -142,7 +136,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
     }
 
     private void processPublish(ChannelHandlerContext ctx, MqttPublishMessage mqttMsg) {
-        if(!checkConnected(ctx)){
+        if (!checkConnected(ctx)) {
             return;
         }
         String topicName = mqttMsg.variableHeader().topicName();
@@ -152,23 +146,23 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
     }
 
     private void processDevicePublish(ChannelHandlerContext ctx, MqttPublishMessage mqttMsg, String topicName, int msgId) {
-        AdaptorToSessionActorMsg msg = null ;
-        try{
-            if(topicName.equals(MqttTopics.DEVICE_TELEMETRY_TOPIC)){
-                msg = adaptor.convertToActorMsg(deviceSessionCtx, MsgType.POST_TELEMETRY_REQUEST,mqttMsg);
-            }else if(topicName.equals(MqttTopics.DEVICE_ATTRIBUTES_TOPIC)){
-                msg = adaptor.convertToActorMsg(deviceSessionCtx, MsgType.POST_ATTRIBUTE_REQUEST,mqttMsg);
-            }else if(topicName.startsWith(MqttTopics.DEVICE_RPC_RESPONSE_TOPIC)){
-                msg = adaptor.convertToActorMsg(deviceSessionCtx,MsgType.FROM_DEVICE_RPC_RESPONSE,mqttMsg);
+        AdaptorToSessionActorMsg msg = null;
+        try {
+            if (topicName.equals(MqttTopics.DEVICE_TELEMETRY_TOPIC)) {
+                msg = adaptor.convertToActorMsg(deviceSessionCtx, MsgType.POST_TELEMETRY_REQUEST, mqttMsg);
+            } else if (topicName.equals(MqttTopics.DEVICE_ATTRIBUTES_TOPIC)) {
+                msg = adaptor.convertToActorMsg(deviceSessionCtx, MsgType.POST_ATTRIBUTE_REQUEST, mqttMsg);
+            } else if (topicName.startsWith(MqttTopics.DEVICE_RPC_RESPONSE_TOPIC)) {
+                msg = adaptor.convertToActorMsg(deviceSessionCtx, MsgType.FROM_DEVICE_RPC_RESPONSE, mqttMsg);
             }
             //TODO 其他数据类型处理
-        }catch(Exception e){
+        } catch (Exception e) {
             //TODO 异常待处理
         }
-        if(msg!=null){
-            processor.process(new BasicToDeviceActorMsg(msg,deviceSessionCtx.getDevice()));
-            System.out.println("received a data "+msg.getMsg().getMsgType());
-        }else{
+        if (msg != null) {
+            processor.process(new BasicToDeviceActorMsg(msg, deviceSessionCtx.getDevice()));
+            System.out.println("received a data " + msg.getMsg().getMsgType());
+        } else {
 
         }
 
@@ -181,13 +175,13 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
 
     private void processAuthTokenConnect(ChannelHandlerContext ctx, MqttConnectMessage msg) {
         String token = msg.payload().userName();
-        if(StringUtil.isEmpty(token)){
+        if (StringUtil.isEmpty(token)) {
             ctx.writeAndFlush(MqttMsgFactory.createMqttConnAckMsg(CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD));
             ctx.close();
-        }else if(!deviceSessionCtx.login(new DeviceTokenCredentials(msg.payload().userName())) ){
+        } else if (!deviceSessionCtx.login(new DeviceTokenCredentials(msg.payload().userName()))) {
             ctx.writeAndFlush(MqttMsgFactory.createMqttConnAckMsg(CONNECTION_REFUSED_NOT_AUTHORIZED));
             ctx.close();
-        }else{
+        } else {
             ctx.writeAndFlush(MqttMsgFactory.createMqttConnAckMsg(CONNECTION_ACCEPTED));
             connected = true;
         }
@@ -195,7 +189,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
 
     private void processDisconnect(ChannelHandlerContext ctx) {
         ctx.close();
-        if(connected){
+        if (connected) {
             //TODO 避免抛出异常暂时关掉
             processor.process(SessionCloseMsg.onDisconnected(deviceSessionCtx.getSessionId()));
         }
@@ -208,6 +202,6 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
 
     @Override
     public void operationComplete(Future<? super Void> future) throws Exception {
-        processor.process(new SessionCloseMsg(deviceSessionCtx.getSessionId(),false,false));
+        processor.process(new SessionCloseMsg(deviceSessionCtx.getSessionId(), false, false));
     }
 }

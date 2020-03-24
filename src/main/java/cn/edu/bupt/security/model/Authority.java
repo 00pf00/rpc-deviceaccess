@@ -12,10 +12,6 @@ public enum Authority {
         this.code = code;
     }
 
-    public String getCode() {
-        return code;
-    }
-
     public static Authority parse(String value) {
         Authority authority = null;
         if (value != null && value.length() != 0) {
@@ -27,5 +23,9 @@ public enum Authority {
             }
         }
         return authority;
+    }
+
+    public String getCode() {
+        return code;
     }
 }

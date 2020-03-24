@@ -5,7 +5,7 @@ import java.util.Optional;
 /**
  * Created by Administrator on 2018/4/14.
  */
-public abstract class BasicTelemetryKvEntry implements KvEntry{
+public abstract class BasicTelemetryKvEntry implements KvEntry {
 
     private final String key;
 

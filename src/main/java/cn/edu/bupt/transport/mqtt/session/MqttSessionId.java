@@ -11,15 +11,17 @@ public class MqttSessionId implements SessionId {
     private static final AtomicLong idSeq = new AtomicLong();
     private final long id;
 
-    public MqttSessionId(){
+    public MqttSessionId() {
         this.id = idSeq.incrementAndGet();
     }
-    public MqttSessionId(long id){
+
+    public MqttSessionId(long id) {
         this.id = id;
     }
+
     @Override
     public String toUidStr() {
-        return "mqtt"+id;
+        return "mqtt" + id;
     }
 
     @Override

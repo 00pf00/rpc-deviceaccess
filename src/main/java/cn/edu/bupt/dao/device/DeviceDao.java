@@ -33,9 +33,9 @@ public interface DeviceDao extends Dao<Device> {
     /**
      * Find devices by tenantId, customerId and page link.
      *
-     * @param tenantId the tenantId
+     * @param tenantId   the tenantId
      * @param customerId the customerId
-     * @param pageLink the page link
+     * @param pageLink   the page link
      * @return the list of device objects
      */
     List<Device> findDevicesByTenantIdAndCustomerId(Integer tenantId, Integer customerId, TextPageLink pageLink);
@@ -44,7 +44,7 @@ public interface DeviceDao extends Dao<Device> {
      * Find devices by tenantId and device name.
      *
      * @param tenantId the tenantId
-     * @param name the device name
+     * @param name     the device name
      * @return the optional device object
      */
     Optional<Device> findDeviceByTenantIdAndName(Integer tenantId, String name);
@@ -56,7 +56,7 @@ public interface DeviceDao extends Dao<Device> {
 
     List<Device> findDevicesByTenantIdAndSiteId(int tenantId, int siteId, TextPageLink pageLink);
 
-    List<Device> findDevices(int tenantId,TextPageLink pageLink);
+    List<Device> findDevices(int tenantId, TextPageLink pageLink);
 
     Long findDevicesCount(int tenantId);
 

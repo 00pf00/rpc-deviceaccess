@@ -1,6 +1,5 @@
 package cn.edu.bupt.actor.actors;
 
-import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.UntypedActor;
@@ -23,9 +22,9 @@ public abstract class ContextAwareActor extends UntypedActor {
     }
 
     protected Cancellable scheduleMsgWithDelay(Object msg, long delayInMs, ActorRef target) {
-      //  getScheduler().scheduleOnce(Duration.create(delayInMs, TimeUnit.MILLISECONDS), target, msg, getSystemDispatcher(), null);
-        Cancellable cancellable = systemContext.getActorSystem().scheduler().scheduleOnce(Duration.create(delayInMs,TimeUnit.MILLISECONDS),
-                target,msg,systemContext.getActorSystem().dispatcher(),null);
+        //  getScheduler().scheduleOnce(Duration.create(delayInMs, TimeUnit.MILLISECONDS), target, msg, getSystemDispatcher(), null);
+        Cancellable cancellable = systemContext.getActorSystem().scheduler().scheduleOnce(Duration.create(delayInMs, TimeUnit.MILLISECONDS),
+                target, msg, systemContext.getActorSystem().dispatcher(), null);
         return cancellable;
     }
 

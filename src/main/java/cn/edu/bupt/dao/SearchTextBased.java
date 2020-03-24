@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.UUID;
 
-public abstract class SearchTextBased extends BaseData{
-    
+public abstract class SearchTextBased extends BaseData {
+
     public SearchTextBased() {
         super();
     }
@@ -15,6 +15,6 @@ public abstract class SearchTextBased extends BaseData{
     }
 
     @JsonIgnore
-    public abstract String getSearchText(); 
+    public abstract String getSearchText();
 
 }

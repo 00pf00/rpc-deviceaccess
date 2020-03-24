@@ -19,21 +19,30 @@ import java.util.Optional;
  */
 @Service
 @Slf4j
-public class BaseEventService implements EventService{
+public class BaseEventService implements EventService {
 
     @Autowired
     public EventDao eventDao;
+    private DataValidator<Event> eventValidator =
+            new DataValidator<Event>() {
+                @Override
+                protected void validateDataImpl(Event event) {
+                    if (event.getEntityId() == null) {
+                        throw new DataValidationException("Entity id should be specified!.");
+                    }
+                    if (StringUtils.isEmpty(event.getEventType())) {
+                        throw new DataValidationException("Event type should be specified!.");
+                    }
+                    if (event.getBody() == null) {
+                        throw new DataValidationException("Event body should be specified!.");
+                    }
+                }
+            };
 
     @Override
     public Event save(Event event) {
         eventValidator.validate(event);
         return eventDao.save(event);
-    }
-
-    @Override
-    public Optional<Event> saveIfNotExists(Event event) {
-        eventValidator.validate(event);
-        return eventDao.saveIfNotExists(event);
     }
 
 //    @Override
@@ -55,6 +64,12 @@ public class BaseEventService implements EventService{
 //    }
 
     @Override
+    public Optional<Event> saveIfNotExists(Event event) {
+        eventValidator.validate(event);
+        return eventDao.saveIfNotExists(event);
+    }
+
+    @Override
     public TimePageData<Event> findEvents(Integer tenantId, String entityId, TimePageLink pageLink) {
         List<Event> events = eventDao.findEvents(tenantId, entityId, pageLink);
         return new TimePageData<>(events, pageLink);
@@ -65,20 +80,4 @@ public class BaseEventService implements EventService{
         List<Event> events = eventDao.findEvents(tenantId, entityId, eventType, pageLink);
         return new TimePageData<>(events, pageLink);
     }
-
-    private DataValidator<Event> eventValidator =
-            new DataValidator<Event>() {
-                @Override
-                protected void validateDataImpl(Event event) {
-                    if (event.getEntityId() == null) {
-                        throw new DataValidationException("Entity id should be specified!.");
-                    }
-                    if (StringUtils.isEmpty(event.getEventType())) {
-                        throw new DataValidationException("Event type should be specified!.");
-                    }
-                    if (event.getBody() == null) {
-                        throw new DataValidationException("Event body should be specified!.");
-                    }
-                }
-            };
 }

@@ -19,9 +19,19 @@ import java.util.Map;
 /**
  * Created by Administrator on 2018/4/17.
  */
-public class AppActor extends ContextAwareActor{
+public class AppActor extends ContextAwareActor {
 
     private final Map<String, ActorRef> tenantActors;
+    private final SupervisorStrategy strategy = new OneForOneStrategy(3, Duration.create("1 minute"), new Function<Throwable, SupervisorStrategy.Directive>() {
+        @Override
+        public SupervisorStrategy.Directive apply(Throwable t) {
+            if (t instanceof RuntimeException) {
+                return SupervisorStrategy.restart();
+            } else {
+                return SupervisorStrategy.stop();
+            }
+        }
+    });
 
     private AppActor(ActorSystemContext systemContext) {
         super(systemContext);
@@ -35,46 +45,35 @@ public class AppActor extends ContextAwareActor{
 
     @Override
     public void onReceive(Object msg) throws Exception {
-        if(msg instanceof FromSessionActorToDeviceActorMsg){
-            process((FromSessionActorToDeviceActorMsg)msg);
-        }else if(msg instanceof FromServerMsg){
-            process((FromServerMsg)msg);
-        }else if(msg instanceof BasicFromServerMsg){
-            process((BasicFromServerMsg)msg);
+        if (msg instanceof FromSessionActorToDeviceActorMsg) {
+            process((FromSessionActorToDeviceActorMsg) msg);
+        } else if (msg instanceof FromServerMsg) {
+            process((FromServerMsg) msg);
+        } else if (msg instanceof BasicFromServerMsg) {
+            process((BasicFromServerMsg) msg);
         }
     }
 
     private void process(FromServerMsg msg) {
-        if(msg.getMsgType().equals(MsgType.FROM_SERVER_RPC_MSG)){
-            String tenantId = ((BasicFromServerRpcMsg)msg).getTenantId();
-            getOrCreateTenantActor(tenantId).tell(msg,ActorRef.noSender());
+        if (msg.getMsgType().equals(MsgType.FROM_SERVER_RPC_MSG)) {
+            String tenantId = ((BasicFromServerRpcMsg) msg).getTenantId();
+            getOrCreateTenantActor(tenantId).tell(msg, ActorRef.noSender());
         }
     }
 
     private void process(FromSessionActorToDeviceActorMsg msg) {
-        getOrCreateTenantActor(msg.getTenantId()).tell(msg,ActorRef.noSender());
+        getOrCreateTenantActor(msg.getTenantId()).tell(msg, ActorRef.noSender());
     }
 
     private void process(BasicFromServerMsg msg) {
-        String tenantId = msg .getTenantId();
-        getOrCreateTenantActor(tenantId).tell(msg,ActorRef.noSender());
+        String tenantId = msg.getTenantId();
+        getOrCreateTenantActor(tenantId).tell(msg, ActorRef.noSender());
     }
 
     private ActorRef getOrCreateTenantActor(String tenantId) {
         return tenantActors.computeIfAbsent(tenantId, k -> context().actorOf(Props.create(new TenantActor.ActorCreator(systemContext, tenantId))
                 .withDispatcher(DefaultActorService.CORE_DISPATCHER_NAME), tenantId.toString()));
     }
-
-    private final SupervisorStrategy strategy = new OneForOneStrategy(3, Duration.create("1 minute"), new Function<Throwable, SupervisorStrategy.Directive>() {
-        @Override
-        public SupervisorStrategy.Directive apply(Throwable t) {
-            if (t instanceof RuntimeException) {
-                return SupervisorStrategy.restart();
-            } else {
-                return SupervisorStrategy.stop();
-            }
-        }
-    });
 
     public static class ActorCreator implements Creator<AppActor> {
         private static final long serialVersionUID = 1L;

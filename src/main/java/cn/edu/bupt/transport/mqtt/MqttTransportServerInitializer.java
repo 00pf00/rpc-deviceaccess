@@ -10,13 +10,11 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
 
-import javax.management.relation.RelationService;
-
 
 /**
  * Created by Administrator on 2018/4/13.
  */
-public class MqttTransportServerInitializer extends ChannelInitializer<SocketChannel>{
+public class MqttTransportServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private static final int MAX_PAYLOAD_SIZE = 64 * 1024 * 1024;
 
@@ -38,7 +36,7 @@ public class MqttTransportServerInitializer extends ChannelInitializer<SocketCha
         pipeline.addLast("decoder", new MqttDecoder(MAX_PAYLOAD_SIZE));
         pipeline.addLast("encoder", MqttEncoder.INSTANCE);
 
-        MqttTransportHandler handler = new MqttTransportHandler(processor, deviceService, authService,adaptor);
+        MqttTransportHandler handler = new MqttTransportHandler(processor, deviceService, authService, adaptor);
         pipeline.addLast(handler);
         socketChannel.closeFuture().addListener(handler);
     }

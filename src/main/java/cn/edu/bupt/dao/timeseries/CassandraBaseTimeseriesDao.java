@@ -2,6 +2,7 @@ package cn.edu.bupt.dao.timeseries;
 
 import cn.edu.bupt.dao.Cassandra.CassandraAbstractAsyncDao;
 import cn.edu.bupt.dao.ModelConstants;
+import cn.edu.bupt.pojo.kv.DataType;
 import cn.edu.bupt.pojo.kv.*;
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
@@ -12,11 +13,8 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import cn.edu.bupt.pojo.kv.DataType;
 
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
@@ -36,12 +34,11 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 @Slf4j
 public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implements TimeseriesDao {
 
-    private static final int MIN_AGGREGATION_STEP_MS = 1000;
     public static final String INSERT_INTO = "INSERT INTO ";
     public static final String GENERATED_QUERY_FOR_ENTITY_TYPE_AND_ENTITY_ID = "Generated query [{}] for entityType {} and entityId {}";
     public static final String SELECT_PREFIX = "SELECT ";
     public static final String EQUALS_PARAM = " = ? ";
-
+    private static final int MIN_AGGREGATION_STEP_MS = 1000;
     @Value("${cassandra.query.ts_key_value_partitioning}")
     private String partitioning;
 
@@ -56,6 +53,76 @@ public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implem
     private PreparedStatement findLatestStmt;
     private PreparedStatement findAllLatestStmt;
     private PreparedStatement findAllKeysStmt;
+
+    public static KvEntry toKvEntry(Row row, String key) {
+        KvEntry kvEntry = null;
+        String strV = row.get(ModelConstants.STRING_VALUE_COLUMN, String.class);
+        if (strV != null) {
+            kvEntry = new StringDataEntry(key, strV);
+        } else {
+            Long longV = row.get(ModelConstants.LONG_VALUE_COLUMN, Long.class);
+            if (longV != null) {
+                kvEntry = new LongDataEntry(key, longV);
+            } else {
+                Double doubleV = row.get(ModelConstants.DOUBLE_VALUE_COLUMN, Double.class);
+                if (doubleV != null) {
+                    kvEntry = new DoubleDataEntry(key, doubleV);
+                } else {
+                    Boolean boolV = row.get(ModelConstants.BOOLEAN_VALUE_COLUMN, Boolean.class);
+                    if (boolV != null) {
+                        kvEntry = new BooleanDataEntry(key, boolV);
+                    } else {
+                        log.warn("All values in key-value row are nullable ");
+                    }
+                }
+            }
+        }
+        return kvEntry;
+    }
+
+    private static String getColumnName(DataType type) {
+        switch (type) {
+            case BOOLEAN:
+                return ModelConstants.BOOLEAN_VALUE_COLUMN;
+            case STRING:
+                return ModelConstants.STRING_VALUE_COLUMN;
+            case LONG:
+                return ModelConstants.LONG_VALUE_COLUMN;
+            case DOUBLE:
+                return ModelConstants.DOUBLE_VALUE_COLUMN;
+            default:
+                throw new RuntimeException("Not implemented!");
+        }
+    }
+
+    private static void addValue(KvEntry kvEntry, BoundStatement stmt, int column) {
+        switch (kvEntry.getDataType()) {
+            case BOOLEAN:
+                Optional<Boolean> booleanValue = kvEntry.getBooleanValue();
+                if (booleanValue.isPresent()) {
+                    stmt.setBool(column, booleanValue.get().booleanValue());
+                }
+                break;
+            case STRING:
+                Optional<String> stringValue = kvEntry.getStrValue();
+                if (stringValue.isPresent()) {
+                    stmt.setString(column, stringValue.get());
+                }
+                break;
+            case LONG:
+                Optional<Long> longValue = kvEntry.getLongValue();
+                if (longValue.isPresent()) {
+                    stmt.setLong(column, longValue.get().longValue());
+                }
+                break;
+            case DOUBLE:
+                Optional<Double> doubleValue = kvEntry.getDoubleValue();
+                if (doubleValue.isPresent()) {
+                    stmt.setDouble(column, doubleValue.get().doubleValue());
+                }
+                break;
+        }
+    }
 
     @PostConstruct
     public void init() {
@@ -91,7 +158,6 @@ public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implem
             }
         }, readResultsProcessingExecutor);
     }
-
 
     private ListenableFuture<List<TsKvEntry>> findAllAsync(UUID entityId, TsKvQuery query) {
         if (query.getAggregation() == Aggregation.NONE) {
@@ -324,32 +390,6 @@ public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implem
         return new BasicTsKvEntry(ts, toKvEntry(row, key));
     }
 
-    public static KvEntry toKvEntry(Row row, String key) {
-        KvEntry kvEntry = null;
-        String strV = row.get(ModelConstants.STRING_VALUE_COLUMN, String.class);
-        if (strV != null) {
-            kvEntry = new StringDataEntry(key, strV);
-        } else {
-            Long longV = row.get(ModelConstants.LONG_VALUE_COLUMN, Long.class);
-            if (longV != null) {
-                kvEntry = new LongDataEntry(key, longV);
-            } else {
-                Double doubleV = row.get(ModelConstants.DOUBLE_VALUE_COLUMN, Double.class);
-                if (doubleV != null) {
-                    kvEntry = new DoubleDataEntry(key, doubleV);
-                } else {
-                    Boolean boolV = row.get(ModelConstants.BOOLEAN_VALUE_COLUMN, Boolean.class);
-                    if (boolV != null) {
-                        kvEntry = new BooleanDataEntry(key, boolV);
-                    } else {
-                        log.warn("All values in key-value row are nullable ");
-                    }
-                }
-            }
-        }
-        return kvEntry;
-    }
-
     /**
      * Select existing partitions from the table
      * <code>{@link ModelConstants#TS_KV_PARTITIONS_CF}</code> for the given entity
@@ -432,7 +472,6 @@ public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implem
         return latestInsertStmts[dataType.ordinal()];
     }
 
-
     private PreparedStatement getPartitionInsertStmt() {
         if (partitionInsertStmt == null) {
             partitionInsertStmt = getSession().prepare(INSERT_INTO + ModelConstants.TS_KV_PARTITIONS_CF +
@@ -454,7 +493,6 @@ public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implem
         }
         return partitionInsertTtlStmt;
     }
-
 
     private PreparedStatement getFindLatestStmt() {
         if (findLatestStmt == null) {
@@ -495,50 +533,6 @@ public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implem
                     "WHERE " + ModelConstants.ENTITY_ID_COLUMN + EQUALS_PARAM);
         }
         return findAllLatestStmt;
-    }
-
-    private static String getColumnName(DataType type) {
-        switch (type) {
-            case BOOLEAN:
-                return ModelConstants.BOOLEAN_VALUE_COLUMN;
-            case STRING:
-                return ModelConstants.STRING_VALUE_COLUMN;
-            case LONG:
-                return ModelConstants.LONG_VALUE_COLUMN;
-            case DOUBLE:
-                return ModelConstants.DOUBLE_VALUE_COLUMN;
-            default:
-                throw new RuntimeException("Not implemented!");
-        }
-    }
-
-    private static void addValue(KvEntry kvEntry, BoundStatement stmt, int column) {
-        switch (kvEntry.getDataType()) {
-            case BOOLEAN:
-                Optional<Boolean> booleanValue = kvEntry.getBooleanValue();
-                if (booleanValue.isPresent()) {
-                    stmt.setBool(column, booleanValue.get().booleanValue());
-                }
-                break;
-            case STRING:
-                Optional<String> stringValue = kvEntry.getStrValue();
-                if (stringValue.isPresent()) {
-                    stmt.setString(column, stringValue.get());
-                }
-                break;
-            case LONG:
-                Optional<Long> longValue = kvEntry.getLongValue();
-                if (longValue.isPresent()) {
-                    stmt.setLong(column, longValue.get().longValue());
-                }
-                break;
-            case DOUBLE:
-                Optional<Double> doubleValue = kvEntry.getDoubleValue();
-                if (doubleValue.isPresent()) {
-                    stmt.setDouble(column, doubleValue.get().doubleValue());
-                }
-                break;
-        }
     }
 
 }

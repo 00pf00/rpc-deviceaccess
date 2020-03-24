@@ -3,7 +3,7 @@ package cn.edu.bupt.dao.exception;
 /**
  * Created by CZX on 2018/4/13.
  */
-public class IOTException extends Exception{
+public class IOTException extends Exception {
 
     private IOTErrorCode errorCode;
 

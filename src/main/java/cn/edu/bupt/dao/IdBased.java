@@ -1,7 +1,5 @@
 package cn.edu.bupt.dao;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.UUID;
 
 /**
@@ -20,12 +18,12 @@ public abstract class IdBased {
         this.id = id;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public UUID getId() {
         return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     @Override

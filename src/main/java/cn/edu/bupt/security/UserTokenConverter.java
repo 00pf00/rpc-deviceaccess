@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * Created by CZX on 2018/5/5.
  */
-public class UserTokenConverter extends DefaultUserAuthenticationConverter{
+public class UserTokenConverter extends DefaultUserAuthenticationConverter {
 
     final String USER_ID = "user_id";
     final String USERNAME = "user_name";
@@ -30,8 +30,8 @@ public class UserTokenConverter extends DefaultUserAuthenticationConverter{
         if (map.containsKey(USERNAME)) {
             Collection<? extends GrantedAuthority> authorities = getAuthorities(map);
             //TODO
-            List<String> permissions =(List<String>) map.get(PERMISSION);
-            SecurityUser securityUser = new SecurityUser((Integer)map.get(USER_ID), (String) map.get(USERNAME),(Integer)map.get(CUSTOMER_ID),(Integer)map.get(TENANT_ID),Authority.parse((String) map.get(AUTHORITY)),permissions);
+            List<String> permissions = (List<String>) map.get(PERMISSION);
+            SecurityUser securityUser = new SecurityUser((Integer) map.get(USER_ID), (String) map.get(USERNAME), (Integer) map.get(CUSTOMER_ID), (Integer) map.get(TENANT_ID), Authority.parse((String) map.get(AUTHORITY)), permissions);
             Object principal = securityUser;
             return new UsernamePasswordAuthenticationToken(principal, "N/A", authorities);
         }

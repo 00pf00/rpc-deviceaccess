@@ -63,6 +63,7 @@ public class DeviceController extends BaseController {
     public DeviceProto.Device saveDevice(@RequestBody DeviceProto.Device device) throws Exception {
         //将提交表单的形式转为json格式提交
         System.out.println("**************************************************88");
+        this.getLog().info("device name = {}", device.getId());
         Device device1 = Convert.toPojo(device, Device.class);
         Device savedDevice = checkNotNull(deviceService.saveDevice(device1));
         deviceService.sendMessage(savedDevice, "新增/更新设备：" + savedDevice.getName());

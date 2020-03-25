@@ -1,5 +1,6 @@
 package cn.edu.bupt.controller;
 
+import cn.bupt.edu.server.controller.HandlerController;
 import cn.edu.bupt.actor.service.DefaultActorService;
 import cn.edu.bupt.dao.exception.*;
 import cn.edu.bupt.security.model.SecurityUser;
@@ -16,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
 @Slf4j
-public class BaseController {
+public class BaseController extends HandlerController {
 
     @Autowired
     protected DeviceService deviceService;
@@ -46,7 +47,7 @@ public class BaseController {
 
     private IOTException handleException(Exception exception, boolean logException) {
         if (logException) {
-            log.error("Error [{}]", exception.getMessage());
+            this.getLog().error("Error [{}]", exception.getMessage());
         }
 
         String cause = "";

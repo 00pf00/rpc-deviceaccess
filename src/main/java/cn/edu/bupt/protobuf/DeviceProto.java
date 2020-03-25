@@ -281,6 +281,7 @@ public final class DeviceProto {
         private volatile java.lang.Object siteId_;
         private long lifeTime_;
         private byte memoizedIsInitialized = -1;
+
         // Use Device.newBuilder() to construct.
         private Device(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
             super(builder);

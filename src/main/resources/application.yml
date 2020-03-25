@@ -9,7 +9,7 @@ mqtt:
     worker_group_thread_count: 12
 
 server:
-  port: 8100
+  port: 8200
 
 cassandra:
   # cluster name

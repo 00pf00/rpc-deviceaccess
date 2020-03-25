@@ -28,33 +28,60 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @ServerEndpoint(value = "/api/v1/deviceaccess/websocket")
 @Component
-public class WebSocketServer /*extends WebSocketBaseServer*/{
-    @Autowired
-    private DeviceService deviceService;
-
-    @Autowired
-    protected BaseTimeseriesService baseTimeseriesService;
-
+public class WebSocketServer /*extends WebSocketBaseServer*/ {
+    //public static Set<Session> sessions= new HashSet<>();
+    public static Map<String, Set<Session>> map = new ConcurrentHashMap<>();
     private static DeviceService deviceStaticService;
-
     private static BaseTimeseriesService baseTimeseriesStaticService;
-
     //静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。
     private static int onlineCount = 0;
-
-    public  String deviceId = null;
-    //public static Set<Session> sessions= new HashSet<>();
-    public static Map<String,Set<Session>> map = new ConcurrentHashMap<>();
-
+    public String deviceId = null;
+    @Autowired
+    protected BaseTimeseriesService baseTimeseriesService;
+    @Autowired
+    private DeviceService deviceService;
     //与某个客户端的连接会话，需要通过它来给客户端发送数据
     private Session session;
 
+    /**
+     * 群发自定义消息
+     */
+    /*
+    public static void sendInfo(String message) throws IOException {
+        log.info(message);
+        for (WebSocketServer item : webSocketSet) {
+            try {
+                item.sendMessage(message);
+            } catch (IOException e) {
+                continue;
+            }
+        }
+    }
+*/
+    public static synchronized int getOnlineCount() {
+        return onlineCount;
+    }
+
+    public static synchronized void addOnlineCount() {
+        WebSocketServer.onlineCount++;
+    }
+
+    public static synchronized void subOnlineCount() {
+        WebSocketServer.onlineCount--;
+    }
+
+    //  //连接打开时执行
+    //  @OnOpen
+    //  public void onOpen(@PathParam("user") String user, Session session) {
+    //      currentUser = user;
+    //      System.out.println("Connected ... " + session.getId());
+    //  }
+
     @PostConstruct
-    public void init(){
+    public void init() {
         deviceStaticService = deviceService;
         baseTimeseriesStaticService = baseTimeseriesService;
     }
-
 
     @OnOpen
     public void onOpen(Session session) {
@@ -68,17 +95,10 @@ public class WebSocketServer /*extends WebSocketBaseServer*/{
         }*/
     }
 
-    public void sendMessage(String message,Session session) throws IOException {
+    public void sendMessage(String message, Session session) throws IOException {
         System.out.println(message);
         session.getBasicRemote().sendText(message);
     }
-
-    //  //连接打开时执行
-    //  @OnOpen
-    //  public void onOpen(@PathParam("user") String user, Session session) {
-    //      currentUser = user;
-    //      System.out.println("Connected ... " + session.getId());
-    //  }
 
     /**
      * 连接关闭调用的方法
@@ -94,12 +114,13 @@ public class WebSocketServer /*extends WebSocketBaseServer*/{
     /**
      * 收到客户端消息后调用的方法
      *
-     * @param message 客户端发送过来的消息*/
+     * @param message 客户端发送过来的消息
+     */
     @OnMessage
     public void onMessage(String message, Session session) throws IOException, ExecutionException, InterruptedException {
         log.info("来自客户端的消息:" + message);
 
-        JsonObject jsonObj = (JsonObject)new JsonParser().parse(message);
+        JsonObject jsonObj = (JsonObject) new JsonParser().parse(message);
         String deviceId = jsonObj.get("deviceId").getAsString();
         this.deviceId = deviceId;
 
@@ -115,15 +136,15 @@ public class WebSocketServer /*extends WebSocketBaseServer*/{
         /*Device device = JSON.parseObject(deviceStr, Device.class);*/
         Device device = deviceStaticService.findDeviceById(toUUID(this.deviceId));
 
-        JsonObject jsonObject =  encodeJson(device,data);
-        sendMessage(jsonObject.toString(),this.session);
+        JsonObject jsonObject = encodeJson(device, data);
+        sendMessage(jsonObject.toString(), this.session);
 
-        if(map.containsKey(deviceId)){
+        if (map.containsKey(deviceId)) {
             map.get(deviceId).add(session);
-        }else{
+        } else {
             Set<Session> s = new HashSet<>();
             s.add(this.session);
-            map.put(deviceId,s);
+            map.put(deviceId, s);
         }
 //        getSubscribeDevices().add(deviceId);
 //        System.out.println(getSubscribeDevices());
@@ -135,35 +156,6 @@ public class WebSocketServer /*extends WebSocketBaseServer*/{
                 e.printStackTrace();
             }
         }*/
-    }
-
-
-    /**
-     * 群发自定义消息
-     * */
-    /*
-    public static void sendInfo(String message) throws IOException {
-        log.info(message);
-        for (WebSocketServer item : webSocketSet) {
-            try {
-                item.sendMessage(message);
-            } catch (IOException e) {
-                continue;
-            }
-        }
-    }
-*/
-
-    public static synchronized int getOnlineCount() {
-        return onlineCount;
-    }
-
-    public static synchronized void addOnlineCount() {
-        WebSocketServer.onlineCount++;
-    }
-
-    public static synchronized void subOnlineCount() {
-        WebSocketServer.onlineCount--;
     }
 
     public String sendGETAllData(String deviceId) throws IOException {
@@ -178,10 +170,10 @@ public class WebSocketServer /*extends WebSocketBaseServer*/{
         OkHttpClient client = new OkHttpClient();
 
         Request.Builder builder = new Request.Builder()
-                .url("http://39.104.189.84:30080/api/v1/deviceaccess/data/alllatestdata/"+deviceId);
+                .url("http://39.104.189.84:30080/api/v1/deviceaccess/data/alllatestdata/" + deviceId);
 
         String token = HttpUtil.getAccessToken();
-        builder.header("Authorization","Bearer "+token);
+        builder.header("Authorization", "Bearer " + token);
 
         Request request = builder.build();
 
@@ -207,10 +199,10 @@ public class WebSocketServer /*extends WebSocketBaseServer*/{
         OkHttpClient client = new OkHttpClient();
 
         Request.Builder builder = new Request.Builder()
-                .url("http://39.104.189.84:30080/api/v1/deviceaccess/device/"+deviceId);
+                .url("http://39.104.189.84:30080/api/v1/deviceaccess/device/" + deviceId);
 
         String token = HttpUtil.getAccessToken();
-        builder.header("Authorization","Bearer "+token);
+        builder.header("Authorization", "Bearer " + token);
 
         Request request = builder.build();
 
@@ -224,24 +216,24 @@ public class WebSocketServer /*extends WebSocketBaseServer*/{
 
     }
 
-    public JsonObject encodeJson (Device device, String data){
-        JsonObject obj =  new JsonObject();
-        obj.addProperty("deviceId",device.getId().toString());
-        obj.addProperty("tenantId",device.getTenantId());
-        obj.addProperty("deviceType",device.getDeviceType());
+    public JsonObject encodeJson(Device device, String data) {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("deviceId", device.getId().toString());
+        obj.addProperty("tenantId", device.getTenantId());
+        obj.addProperty("deviceType", device.getDeviceType());
 
         JsonArray array = new JsonArray();
 
         JsonArray dataArray = new JsonParser().parse(data).getAsJsonArray();
-        for(JsonElement elementData : dataArray ){
+        for (JsonElement elementData : dataArray) {
             JsonObject objData = elementData.getAsJsonObject();
 
             JsonObject jsonObj = new JsonObject();
 
-            jsonObj.addProperty("ts",objData.get("ts").getAsLong());
+            jsonObj.addProperty("ts", objData.get("ts").getAsLong());
             JsonObject kv = objData.get("kv").getAsJsonObject();
-            jsonObj.addProperty("key",kv.get("key").getAsString());
-            jsonObj.addProperty("value",kv.get("value").getAsString());
+            jsonObj.addProperty("key", kv.get("key").getAsString());
+            jsonObj.addProperty("value", kv.get("value").getAsString());
             /*switch(objData.get("dataType").getAsString()){
                 case "string":
                     jsonObj.addProperty("value",objData.get("value").getAsString());
@@ -255,17 +247,17 @@ public class WebSocketServer /*extends WebSocketBaseServer*/{
                 case "double":
                     jsonObj.addProperty("value",objData.get("value").getAsDouble());
                     break;*/
-           //}
+            //}
             array.add(jsonObj);
         }
-        obj.add("data",array);
+        obj.add("data", array);
         return obj;
     }
 
     UUID toUUID(String id) {
-        if(id==null) {
+        if (id == null) {
             return null;
-        }else {
+        } else {
             return UUID.fromString(id);
         }
     }

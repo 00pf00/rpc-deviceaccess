@@ -5,17 +5,19 @@ import java.util.Optional;
 /**
  * Created by Administrator on 2018/4/14.
  */
-public class BasicAttributeKvEntry implements KvEntry{
+public class BasicAttributeKvEntry implements KvEntry {
 
     private final long lastUpdateTs;
     private final KvEntry kv;
 
-    public BasicAttributeKvEntry(long ts,KvEntry kv){
+    public BasicAttributeKvEntry(long ts, KvEntry kv) {
         this.lastUpdateTs = ts;
         this.kv = kv;
     }
 
-    public long getLastUpdateTs(){return lastUpdateTs;}
+    public long getLastUpdateTs() {
+        return lastUpdateTs;
+    }
 
     @Override
     public String getKey() {

@@ -3,28 +3,32 @@ package cn.edu.bupt.dao.device;
 import cn.edu.bupt.dao.Cassandra.CassandraAbstractSearchTextDao;
 import cn.edu.bupt.dao.ModelConstants;
 import cn.edu.bupt.dao.page.TextPageLink;
-import cn.edu.bupt.pojo.Device ;
+import cn.edu.bupt.pojo.Device;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.querybuilder.Select;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static cn.edu.bupt.dao.ModelConstants.*;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 
 /**
  * Created by CZX on 2018/4/17.
  */
 @Component
-public class CassandraDeviceDao extends CassandraAbstractSearchTextDao<Device> implements DeviceDao{
+public class CassandraDeviceDao extends CassandraAbstractSearchTextDao<Device> implements DeviceDao {
 
-    private PreparedStatement fetchStmt;
-    private PreparedStatement fetchCustomerCountStmt;
     public static final String SELECT_PREFIX = "SELECT ";
     public static final String EQUALS_PARAM = " = ? ";
+    private PreparedStatement fetchStmt;
+    private PreparedStatement fetchCustomerCountStmt;
 
     @Override
     protected Class<Device> getColumnFamilyClass() {
@@ -81,8 +85,7 @@ public class CassandraDeviceDao extends CassandraAbstractSearchTextDao<Device> i
     }
 
     @Override
-    public List<Device> findDevicesByManufactureAndDeviceTypeAndModel(String manufacture, String deviceType, String model, TextPageLink pageLink)
-    {
+    public List<Device> findDevicesByManufactureAndDeviceTypeAndModel(String manufacture, String deviceType, String model, TextPageLink pageLink) {
         List<Device> devices = findPageWithTextSearch(DEVICE_BY_MANUFACTURE_AND_DEVICE_TYPE_AND_MODEL,
                 Arrays.asList(eq(DEVICE_MANUFACTURE_PROPERTY, manufacture),
                         eq(DEVICE_DEVICE_TYPE_PROPERTY, deviceType),
@@ -101,7 +104,7 @@ public class CassandraDeviceDao extends CassandraAbstractSearchTextDao<Device> i
     }
 
     @Override
-    public List<Device> findDevicesByTenantIdAndSiteId(int tenantId, int siteId, TextPageLink pageLink){
+    public List<Device> findDevicesByTenantIdAndSiteId(int tenantId, int siteId, TextPageLink pageLink) {
         List<Device> devices = findPageWithIdDesc(DEVICE_BY_TENANT_AND_SITE,
                 Arrays.asList(eq(DEVICE_TENANT_ID_PROPERTY, tenantId), eq(DEVICE_SITE_ID_PROPERTY, siteId)),
                 pageLink);
@@ -109,7 +112,7 @@ public class CassandraDeviceDao extends CassandraAbstractSearchTextDao<Device> i
     }
 
     @Override
-    public List<Device> findDevices(int tenantId,TextPageLink pageLink) {
+    public List<Device> findDevices(int tenantId, TextPageLink pageLink) {
         List<Device> devices = findPageWithTextSearch("device_by_tenant_and_search_text2",
                 Collections.singletonList(eq(DEVICE_TENANT_ID_PROPERTY, tenantId)), pageLink);
         return devices;
@@ -134,7 +137,7 @@ public class CassandraDeviceDao extends CassandraAbstractSearchTextDao<Device> i
     }
 
     private PreparedStatement getCountStmt() {
-        if(fetchStmt==null) {
+        if (fetchStmt == null) {
             fetchStmt = getSession().prepare(SELECT_PREFIX +
                     "count(id)" + " FROM " + ModelConstants.DEVICE_BY_TENANT_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME
                     + " WHERE " + ModelConstants.DEVICE_TENANT_ID_PROPERTY + EQUALS_PARAM);
@@ -143,7 +146,7 @@ public class CassandraDeviceDao extends CassandraAbstractSearchTextDao<Device> i
     }
 
     private PreparedStatement getCustomerCountStmt() {
-        if(fetchCustomerCountStmt==null) {
+        if (fetchCustomerCountStmt == null) {
             fetchCustomerCountStmt = getSession().prepare(SELECT_PREFIX +
                     "count(id)" + " FROM " + ModelConstants.DEVICE_BY_CUSTOMER_AND_SEARCH_TEXT_COLUMN_FAMILY_NAME
                     + " WHERE " + ModelConstants.DEVICE_CUSTOMER_ID_PROPERTY + EQUALS_PARAM);

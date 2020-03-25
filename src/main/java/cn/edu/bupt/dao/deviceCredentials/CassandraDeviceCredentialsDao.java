@@ -15,7 +15,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
  * Created by CZX on 2018/4/17.
  */
 @Component
-public class CassandraDeviceCredentialsDao extends CassandraAbstractModelDao<DeviceCredentials> implements DeviceCredentialsDao{
+public class CassandraDeviceCredentialsDao extends CassandraAbstractModelDao<DeviceCredentials> implements DeviceCredentialsDao {
 
     @Override
     protected Class<DeviceCredentials> getColumnFamilyClass() {

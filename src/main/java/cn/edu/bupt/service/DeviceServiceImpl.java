@@ -14,7 +14,10 @@ import cn.edu.bupt.pojo.DeviceCredentials;
 import cn.edu.bupt.pojo.Tenant;
 import cn.edu.bupt.security.HttpUtil;
 import com.alibaba.fastjson.JSON;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import okhttp3.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -38,7 +41,7 @@ import static cn.edu.bupt.dao.util.Validator.*;
  * Created by Administrator on 2018/4/14.
  */
 @Service
-public class DeviceServiceImpl implements  DeviceService, InitializingBean{
+public class DeviceServiceImpl implements DeviceService, InitializingBean {
 
     public static final String INCORRECT_TENANT_ID = "Incorrect tenantId ";
     public static final String INCORRECT_PAGE_LINK = "Incorrect page link ";
@@ -69,9 +72,75 @@ public class DeviceServiceImpl implements  DeviceService, InitializingBean{
 
     @Autowired
     private DeviceByGroupIdDao deviceByGroupIdDao;
+    private DataValidator<Device> deviceValidator =
+            new DataValidator<Device>() {
+
+                @Override
+                protected void validateCreate(Device device) {
+                    deviceDao.findDeviceByTenantIdAndName(device.getTenantId(), device.getName()).ifPresent(
+                            d -> {
+                                throw new DataValidationException("Device with such name already exists!");
+                            }
+                    );
+                }
+
+                @Override
+                protected void validateUpdate(Device device) {
+                    deviceDao.findDeviceByTenantIdAndName(device.getTenantId(), device.getName()).ifPresent(
+                            d -> {
+                                if (!d.getId().equals(device.getId())) {
+                                    throw new DataValidationException("Device with such name already exists!");
+                                }
+                            }
+                    );
+                    device.setSiteId(deviceDao.findById(device.getId()).getSiteId());
+                }
+
+                @Override
+                protected void validateDataImpl(Device device) {
+                    if (StringUtils.isEmpty(device.getName())) {
+                        throw new DataValidationException("Device name should be specified!");
+                    }
+                    if (device.getTenantId() == null || device.getTenantId() == 1) {
+                        throw new DataValidationException("Device should be assigned to tenant!");
+                    }
+                    if (device.getCustomerId() == null) {
+                        device.setCustomerId(1);
+                    }
+                    if (StringUtils.isEmpty(device.getManufacture())) {
+                        device.setManufacture("default");
+//                        throw new DataValidationException("Device manufacture should be specified!");
+                    }
+                    if (StringUtils.isEmpty(device.getDeviceType())) {
+                        device.setDeviceType("default");
+//                        throw new DataValidationException("Device type should be specified!");
+                    }
+                    if (StringUtils.isEmpty(device.getModel())) {
+                        device.setModel("default");
+//                        throw new DataValidationException("Device model should be specified!");
+                    }
+                    if (device.getLifeTime() == null) {
+                        device.setLifeTime(0L);
+//                        throw new DataValidationException("Device model should be specified!");
+                    }
+                }
+            };
+    private PaginatedRemover<Integer, Device> tenantDevicesRemover =
+            new PaginatedRemover<Integer, Device>() {
+
+                @Override
+                protected List<Device> findEntities(Integer id, TextPageLink pageLink) {
+                    return deviceDao.findDevicesByTenantId(id, pageLink);
+                }
+
+                @Override
+                protected void removeEntity(Device entity) {
+                    deleteDevice(entity.getId());
+                }
+            };
 
     @Override
-    public Long findDevicesCountWithTextSearch(Integer tenantId, TextPageLink pageLink){
+    public Long findDevicesCountWithTextSearch(Integer tenantId, TextPageLink pageLink) {
         validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
 //        validateString(pageLink.getTextSearch(), INCORRECT_TEXT_SEARCH + pageLink.getTextSearch());
         Long count = deviceDao.findDevicesCountByTenantId(tenantId, pageLink);
@@ -79,7 +148,7 @@ public class DeviceServiceImpl implements  DeviceService, InitializingBean{
     }
 
     @Override
-    public Long findDevicesCountWithTextSearch(Integer tenantId, Integer customerId, TextPageLink pageLink){
+    public Long findDevicesCountWithTextSearch(Integer tenantId, Integer customerId, TextPageLink pageLink) {
         validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
         validateId(customerId, INCORRECT_CUSTOMER_ID + customerId);
 //        validateString(pageLink.getTextSearch(), INCORRECT_TEXT_SEARCH + pageLink.getTextSearch());
@@ -88,19 +157,19 @@ public class DeviceServiceImpl implements  DeviceService, InitializingBean{
     }
 
     @Override
-    public Long findDevicesCount(Integer tenantId){
+    public Long findDevicesCount(Integer tenantId) {
         validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
         return deviceDao.findDevicesCount(tenantId);
     }
 
     @Override
-    public Long findCustomerDevicesCount(Integer customerId){
+    public Long findCustomerDevicesCount(Integer customerId) {
         validateId(customerId, INCORRECT_CUSTOMER_ID + customerId);
         return deviceDao.findCustomerDevicesCount(customerId);
     }
 
     @Override
-    public Device updateDeviceSiteId(UUID deviceId,Integer siteId){
+    public Device updateDeviceSiteId(UUID deviceId, Integer siteId) {
         validateId(deviceId, INCORRECT_DEVICE_ID + deviceId);
         validateId(siteId, INCORRECT_SITE_ID + siteId);
         Device device = findDeviceById(deviceId);
@@ -115,7 +184,7 @@ public class DeviceServiceImpl implements  DeviceService, InitializingBean{
         validatePageLink(pageLink, INCORRECT_PAGE_LINK + pageLink);
         List<Device> devices = new ArrayList<Device>();
         List<UUID> deviceIds = deviceByGroupIdDao.findDevicesByGroupId(groupId);
-        for(UUID deviceId : deviceIds){
+        for (UUID deviceId : deviceIds) {
             devices.add(deviceDao.findById(deviceId));
         }
         return new TextPageData<>(devices, pageLink);
@@ -124,15 +193,15 @@ public class DeviceServiceImpl implements  DeviceService, InitializingBean{
     //******分配相应设备到对应的设备组******
     @Override
     public void assignDeviceToGroup(UUID deviceId, UUID groupId) {
-        DeviceByGroupId deviceByGroupId = new DeviceByGroupId(groupId,deviceId);
+        DeviceByGroupId deviceByGroupId = new DeviceByGroupId(groupId, deviceId);
         deviceByGroupIdDao.save(deviceByGroupId);
     }
 
     @Override
-    public void unassignDeviceFromGroup(UUID deviceId , UUID groupId){
+    public void unassignDeviceFromGroup(UUID deviceId, UUID groupId) {
         validateId(deviceId, INCORRECT_DEVICE_ID + deviceId);
         validateId(groupId, INCORRECT_GROUP_ID + groupId);
-        deviceByGroupIdDao.delete(new DeviceByGroupId(groupId,deviceId));
+        deviceByGroupIdDao.delete(new DeviceByGroupId(groupId, deviceId));
     }
 
     //******Unassign设备组中的所有设备******
@@ -145,10 +214,8 @@ public class DeviceServiceImpl implements  DeviceService, InitializingBean{
     //******根据parentDeviceId寻找设备******
     @Override
     public List<Device> findDeviceByParentDeviceId(String parentDeviceId, TextPageLink pageLink) {
-        return deviceDao.findDevicesByParentDeviceId(parentDeviceId,pageLink);
+        return deviceDao.findDevicesByParentDeviceId(parentDeviceId, pageLink);
     }
-
-
 
     @Override
     public Device findDeviceById(UUID deviceId) {
@@ -203,8 +270,8 @@ public class DeviceServiceImpl implements  DeviceService, InitializingBean{
             deviceCredentialsService.deleteDeviceCredentials(deviceCredentials);
         }
         List<UUID> groupIds = deviceByGroupIdDao.findGroupsByDeviceId(deviceId);
-        for(UUID groupId : groupIds){
-            deviceByGroupIdDao.delete(new DeviceByGroupId(groupId,deviceId));
+        for (UUID groupId : groupIds) {
+            deviceByGroupIdDao.delete(new DeviceByGroupId(groupId, deviceId));
         }
         deviceDao.removeById(deviceId);
     }
@@ -232,18 +299,16 @@ public class DeviceServiceImpl implements  DeviceService, InitializingBean{
         return new TextPageData<>(devices, pageLink);
     }
 
-
     //TODO: 加入tenantId和CustomerId作为参数
     @Override
-    public TextPageData<Device> findDevicesByManufactureAndDeviceTypeAndModel(String manufacture, String deviceType, String model, TextPageLink pageLink){
-        validateString(manufacture,INCORRECT_MANUFACTURE);
-        validateString(deviceType,INCORRECT_DEVICE_TYPE);
-        validateString(model,INCORRECT_MODEL);
+    public TextPageData<Device> findDevicesByManufactureAndDeviceTypeAndModel(String manufacture, String deviceType, String model, TextPageLink pageLink) {
+        validateString(manufacture, INCORRECT_MANUFACTURE);
+        validateString(deviceType, INCORRECT_DEVICE_TYPE);
+        validateString(model, INCORRECT_MODEL);
         validatePageLink(pageLink, INCORRECT_PAGE_LINK + pageLink);
-        List<Device> devices = deviceDao.findDevicesByManufactureAndDeviceTypeAndModel(manufacture,deviceType,model,pageLink);
+        List<Device> devices = deviceDao.findDevicesByManufactureAndDeviceTypeAndModel(manufacture, deviceType, model, pageLink);
         return new TextPageData<>(devices, pageLink);
     }
-
 
     @Override
     public void unassignCustomerDevices(Integer tenantId, Integer customerId) {
@@ -254,19 +319,19 @@ public class DeviceServiceImpl implements  DeviceService, InitializingBean{
     }
 
     @Override
-    public TextPageData<Device> findDevicesByTenantIdAndSiteId(Integer tenantId, Integer siteId, TextPageLink pageLink){
+    public TextPageData<Device> findDevicesByTenantIdAndSiteId(Integer tenantId, Integer siteId, TextPageLink pageLink) {
         validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
         validateId(siteId, INCORRECT_SITE_ID + siteId);
         validatePageLink(pageLink, INCORRECT_PAGE_LINK + pageLink);
-        List<Device> devices = deviceDao.findDevicesByTenantIdAndSiteId(tenantId,siteId,pageLink);
+        List<Device> devices = deviceDao.findDevicesByTenantIdAndSiteId(tenantId, siteId, pageLink);
         return new TextPageData<>(devices, pageLink);
     }
 
     @Override
-    public TextPageData<Device> findDevices(Integer tenantId,TextPageLink pageLink){
+    public TextPageData<Device> findDevices(Integer tenantId, TextPageLink pageLink) {
         validateId(tenantId, INCORRECT_TENANT_ID + tenantId);
         validatePageLink(pageLink, INCORRECT_PAGE_LINK + pageLink);
-        List<Device> devices = deviceDao.findDevices(tenantId,pageLink);
+        List<Device> devices = deviceDao.findDevices(tenantId, pageLink);
         return new TextPageData<>(devices, pageLink);
     }
 
@@ -280,73 +345,114 @@ public class DeviceServiceImpl implements  DeviceService, InitializingBean{
         new TenantDevicesActivated().removeEntities(tenantId);
     }
 
-    private DataValidator<Device> deviceValidator =
-            new DataValidator<Device>() {
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        String textSearch = null;
+        String idOffset = null;
+        String textOffset = null;
+        TextPageData pageData;
 
-                @Override
-                protected void validateCreate(Device device) {
-                    deviceDao.findDeviceByTenantIdAndName(device.getTenantId(), device.getName()).ifPresent(
-                            d -> {
-                                throw new DataValidationException("Device with such name already exists!");
-                            }
-                    );
-                }
+        Observable
+                .interval(1, TimeUnit.DAYS)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(Schedulers.io())
+                .subscribe(new Action1<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        try {
+                            List<Tenant> tenants = getTenants();
+                            TextPageData pageData;
+                            for (Tenant tenant : tenants) {
+                                TextPageLink pageLink = new TextPageLink(1000, textSearch, idOffset == null ? null : UUID.fromString(idOffset), textOffset);
+                                pageData = findDevices(tenant.getId(), pageLink);
+                                checkData(pageData);
 
-                @Override
-                protected void validateUpdate(Device device) {
-                    deviceDao.findDeviceByTenantIdAndName(device.getTenantId(), device.getName()).ifPresent(
-                            d -> {
-                                if (!d.getId().equals(device.getId())) {
-                                    throw new DataValidationException("Device with such name already exists!");
+                                while (pageData.hasNext()) {
+                                    pageData = findDevices(tenant.getId(), pageData.getNextPageLink());
+                                    checkData(pageData);
                                 }
                             }
-                    );
-                    device.setSiteId(deviceDao.findById(device.getId()).getSiteId());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+    }
+
+    private List<Tenant> getTenants() throws Exception {
+        //Gson gs = new Gson();
+        List<Tenant> tenants = new ArrayList<>();
+        int page = 0;
+
+        while (true) {
+            String response = httpUtil.sendGet("http://account:8400/api/v1/account/tenants?limit=1000&page=" + page, null);
+
+            if (response != null) {
+                JsonArray jsonArray = new JsonParser().parse(response).getAsJsonArray();
+
+                if (jsonArray.size() == 0) {
+                    return tenants;
                 }
 
-                @Override
-                protected void validateDataImpl(Device device) {
-                    if (StringUtils.isEmpty(device.getName())) {
-                        throw new DataValidationException("Device name should be specified!");
-                    }
-                    if (device.getTenantId() == null || device.getTenantId()==1) {
-                        throw new DataValidationException("Device should be assigned to tenant!");
-                    }
-                    if (device.getCustomerId() == null) {
-                        device.setCustomerId(1);
-                    }
-                    if (StringUtils.isEmpty(device.getManufacture())) {
-                        device.setManufacture("default");
-//                        throw new DataValidationException("Device manufacture should be specified!");
-                    }
-                    if (StringUtils.isEmpty(device.getDeviceType())) {
-                        device.setDeviceType("default");
-//                        throw new DataValidationException("Device type should be specified!");
-                    }
-                    if (StringUtils.isEmpty(device.getModel())) {
-                        device.setModel("default");
-//                        throw new DataValidationException("Device model should be specified!");
-                    }
-                    if (device.getLifeTime() == null) {
-                        device.setLifeTime(0L);
-//                        throw new DataValidationException("Device model should be specified!");
-                    }
+                for (JsonElement jsonElement : jsonArray) {
+                    JsonObject jsonObject = jsonElement.getAsJsonObject();
+                    tenants.add(JSON.parseObject(jsonObject.toString(), Tenant.class));
                 }
-            };
+                page++;
+            } else {
+                throw new IOException("Unexpected code " + response);
+            }
+        }
+    }
 
-    private PaginatedRemover<Integer,Device> tenantDevicesRemover =
-            new PaginatedRemover<Integer,Device>() {
+    public String sendMessage(Device device, String message) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("message", message);
+        jsonObject.addProperty("messageType", "fromModule");
+        jsonObject.addProperty("ts", System.currentTimeMillis());
+        jsonObject.addProperty("tenantId", device.getTenantId());
 
-                @Override
-                protected List<Device> findEntities(Integer id, TextPageLink pageLink) {
-                    return deviceDao.findDevicesByTenantId(id, pageLink);
+
+        OkHttpClient client = new OkHttpClient();
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8")
+                , jsonObject.toString());
+
+        System.out.println(requestBody);
+
+        Request request = new Request.Builder()
+                .url("http://updatemessageplugin:8500/api/v1/updatemessageplugin/updateMessage/insert")
+                .post(requestBody)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                System.out.println(e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    System.out.println("Success");
                 }
+            }
+        });
+        return "Success";
+    }
 
-                @Override
-                protected void removeEntity(Device entity) {
-                    deleteDevice(entity.getId());
-                }
-            };
+    public void checkData(TextPageData pageData) {
+        String message = null;
+        for (Object object : pageData.getData()) {
+            Device device = (Device) object;
+            if ((device.getLifeTime() - System.currentTimeMillis()) <= 15552000000L && (device.getLifeTime() - System.currentTimeMillis()) > 15465600000L) {
+                message = device.getName() + "设备距离检修年限不足6个月";
+                sendMessage(device, message);
+            }
+            if ((device.getLifeTime() - System.currentTimeMillis()) <= 2592000000L && (device.getLifeTime() - System.currentTimeMillis()) > 2505600000L) {
+                message = device.getName() + "设备距离检修年限不足1个月";
+                sendMessage(device, message);
+            }
+        }
+    }
 
     private class CustomerDevicesUnassigner extends PaginatedRemover<Integer, Device> {
 
@@ -371,8 +477,8 @@ public class DeviceServiceImpl implements  DeviceService, InitializingBean{
     private class TenantDevicesSuspended extends PaginatedRemover<Integer, Device> {
 
         @Override
-        protected List<Device> findEntities(Integer id,TextPageLink pageLink) {
-            return deviceDao.findDevices(id,pageLink);
+        protected List<Device> findEntities(Integer id, TextPageLink pageLink) {
+            return deviceDao.findDevices(id, pageLink);
         }
 
         @Override
@@ -387,8 +493,8 @@ public class DeviceServiceImpl implements  DeviceService, InitializingBean{
     private class TenantDevicesActivated extends PaginatedRemover<Integer, Device> {
 
         @Override
-        protected List<Device> findEntities(Integer id,TextPageLink pageLink) {
-            return deviceDao.findDevices(id,pageLink);
+        protected List<Device> findEntities(Integer id, TextPageLink pageLink) {
+            return deviceDao.findDevices(id, pageLink);
         }
 
         @Override
@@ -398,115 +504,6 @@ public class DeviceServiceImpl implements  DeviceService, InitializingBean{
             deviceCredentialsService.updateDeviceCredentials(deviceCredentials);
         }
 
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception{
-        String textSearch = null;
-        String idOffset = null;
-        String textOffset = null;
-        TextPageData pageData;
-
-        Observable
-                .interval(1, TimeUnit.DAYS)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(Schedulers.io())
-                .subscribe(new Action1<Long>() {
-                    @Override
-                    public void call(Long aLong) {
-                        try {
-                            List<Tenant> tenants= getTenants();
-                            TextPageData pageData;
-                            for (Tenant tenant: tenants){
-                                TextPageLink pageLink = new TextPageLink(1000, textSearch,idOffset==null?null:UUID.fromString(idOffset), textOffset);
-                                pageData = findDevices(tenant.getId() , pageLink);
-                                checkData(pageData);
-
-                                while(pageData.hasNext()) {
-                                    pageData = findDevices(tenant.getId() , pageData.getNextPageLink());
-                                    checkData(pageData);
-                                }
-                            }
-                        }  catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-    }
-
-    private List<Tenant> getTenants() throws Exception {
-        //Gson gs = new Gson();
-        List<Tenant> tenants = new ArrayList<>();
-        int page = 0;
-
-        while(true) {
-            String response = httpUtil.sendGet("http://account:8400/api/v1/account/tenants?limit=1000&page="+page,null);
-
-            if (response!=null) {
-                JsonArray jsonArray = new JsonParser().parse(response).getAsJsonArray();
-
-                if(jsonArray.size()==0){
-                    return tenants;
-                }
-
-                for(JsonElement jsonElement:jsonArray){
-                    JsonObject jsonObject = jsonElement.getAsJsonObject();
-                    tenants.add(JSON.parseObject(jsonObject.toString(), Tenant.class));
-                }
-                page++;
-            } else {
-                throw new IOException("Unexpected code " + response);
-            }
-        }
-    }
-
-    public String sendMessage(Device device,String message){
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("message",message);
-        jsonObject.addProperty("messageType", "fromModule");
-        jsonObject.addProperty("ts", System.currentTimeMillis());
-        jsonObject.addProperty("tenantId",device.getTenantId());
-
-
-        OkHttpClient client = new OkHttpClient();
-        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8")
-                , jsonObject.toString());
-
-        System.out.println(requestBody);
-
-        Request request = new Request.Builder()
-                .url("http://updatemessageplugin:8500/api/v1/updatemessageplugin/updateMessage/insert")
-                .post(requestBody)
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                System.out.println(e);
-            }
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if(response.isSuccessful()){
-                    System.out.println("Success");
-                }
-            }
-        });
-        return "Success";
-    }
-
-    public void checkData(TextPageData pageData){
-        String message = null;
-        for(Object object:pageData.getData())
-        {
-            Device device = (Device)object;
-            if((device.getLifeTime()-System.currentTimeMillis())<=15552000000L && (device.getLifeTime()-System.currentTimeMillis())>15465600000L ){
-                message = device.getName()+"设备距离检修年限不足6个月";
-                sendMessage(device,message);
-            }
-            if((device.getLifeTime()-System.currentTimeMillis())<=2592000000L && (device.getLifeTime()-System.currentTimeMillis())>2505600000L ){
-                message = device.getName()+"设备距离检修年限不足1个月";
-                sendMessage(device,message);
-            }
-        }
     }
 
 }

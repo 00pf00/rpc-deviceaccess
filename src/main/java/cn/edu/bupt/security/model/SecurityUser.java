@@ -1,4 +1,3 @@
-
 package cn.edu.bupt.security.model;
 
 import org.springframework.security.core.GrantedAuthority;

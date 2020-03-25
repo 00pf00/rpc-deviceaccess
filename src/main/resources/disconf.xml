@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+cp <?xml version="1.0" encoding="UTF-8"?>
 
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
         http://www.springframework.org/schema/aop
@@ -19,17 +19,17 @@
     </bean>
 
     <!-- 使用托管方式的disconf配置(无代码侵入, 配置更改会自动reload)-->
-     <bean id="configproperties_disconf"
+    <bean id="configproperties_disconf"
           class="com.baidu.disconf.client.addons.properties.ReloadablePropertiesFactoryBean">
-         <property name="locations">
+        <property name="locations">
             <list>
                 <value>classpath*:actor-system.conf</value>
                 <value>classpath*:application.yml</value>
                 <value>classpath*:kafka.yaml</value>
-           <!--     <value>classpath*:simple.properties</value>-->
+                <!--     <value>classpath*:simple.properties</value>-->
             </list>
-        </property> 
-    </bean> 
+        </property>
+    </bean>
 
     <bean id="propertyConfigurer"
           class="com.baidu.disconf.client.addons.properties.ReloadingPropertyPlaceholderConfigurer">

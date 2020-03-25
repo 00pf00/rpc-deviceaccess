@@ -5,12 +5,12 @@ import java.util.Optional;
 /**
  * Created by Administrator on 2018/4/25.
  */
-public class BasicAdaptorTsKvEntry implements TsKvEntry{
+public class BasicAdaptorTsKvEntry implements TsKvEntry {
 
     private final long ts;
     private final cn.edu.bupt.common.entry.KvEntry kv;
 
-    public BasicAdaptorTsKvEntry(long ts, cn.edu.bupt.common.entry.KvEntry kv){
+    public BasicAdaptorTsKvEntry(long ts, cn.edu.bupt.common.entry.KvEntry kv) {
         this.ts = ts;
         this.kv = kv;
     }
@@ -22,7 +22,7 @@ public class BasicAdaptorTsKvEntry implements TsKvEntry{
 
     @Override
     public DataType getDataType() {
-        switch(kv.getDataType()){
+        switch (kv.getDataType()) {
             case "string":
                 return DataType.STRING;
             case "long":

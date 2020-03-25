@@ -27,9 +27,9 @@ public class TenantActor extends ContextAwareActor {
     private final Map<String, ActorRef> deviceActors;
     private final Map<String, Long> deviceLiveTime;
     private final String tenantId;
-    private final String DEVICE_OFFLINE  = "device is offline";
+    private final String DEVICE_OFFLINE = "device is offline";
 
-    public TenantActor(ActorSystemContext systemContext,String tenantId){
+    public TenantActor(ActorSystemContext systemContext, String tenantId) {
         super(systemContext);
         this.deviceActors = new HashMap<>();
         this.deviceLiveTime = new HashMap<>();
@@ -38,66 +38,66 @@ public class TenantActor extends ContextAwareActor {
 
     @Override
     public void onReceive(Object msg) throws Exception {
-        if(msg instanceof BasicToDeviceActorMsg){
-            if(!deviceLiveTime.containsKey(((BasicToDeviceActorMsg) msg).getDeviceId())){
+        if (msg instanceof BasicToDeviceActorMsg) {
+            if (!deviceLiveTime.containsKey(((BasicToDeviceActorMsg) msg).getDeviceId())) {
                 Device device = ((BasicToDeviceActorMsg) msg).getDevice();
 
                 ModelService modelService = systemContext.getModelService();
 
                 Model model = modelService.getModel(device.getManufacture(), device.getDeviceType(), device.getModel());
-                if(model==null){
+                if (model == null) {
                     deviceLiveTime.put(((BasicToDeviceActorMsg) msg).getDeviceId(), 60000L);
-                }else if(model.getLimit_lifetime()==0L){
+                } else if (model.getLimit_lifetime() == 0L) {
                     deviceLiveTime.put(((BasicToDeviceActorMsg) msg).getDeviceId(), 60000L);
-                }else{
+                } else {
                     deviceLiveTime.put(((BasicToDeviceActorMsg) msg).getDeviceId(), model.getLimit_lifetime());
                 }
             }
-            getOrCreateDeviceActor(((BasicToDeviceActorMsg) msg).getDeviceId()).tell(msg,ActorRef.noSender());
-        }else if(msg instanceof BasicToDeviceActorSessionMsg){
+            getOrCreateDeviceActor(((BasicToDeviceActorMsg) msg).getDeviceId()).tell(msg, ActorRef.noSender());
+        } else if (msg instanceof BasicToDeviceActorSessionMsg) {
             //TODO 待完成
-            ActorRef ref = deviceActors.get(((BasicToDeviceActorSessionMsg)msg).getDeviceId());
-            if(ref != null){
+            ActorRef ref = deviceActors.get(((BasicToDeviceActorSessionMsg) msg).getDeviceId());
+            if (ref != null) {
                 //TODO 延时时间改为通过配置文件注入
-                scheduleMsgWithDelay(msg,deviceLiveTime.get(((BasicToDeviceActorSessionMsg)msg).getDeviceId()),ref);
+                scheduleMsgWithDelay(msg, deviceLiveTime.get(((BasicToDeviceActorSessionMsg) msg).getDeviceId()), ref);
             }
-        }else if(msg instanceof  DeviceTerminationMsg){
-            deviceLiveTime.remove(((DeviceTerminationMsg)msg).getDeviceId());
-            ActorRef ref =  deviceActors.remove(((DeviceTerminationMsg)msg).getDeviceId());
-            if(ref!=null){
+        } else if (msg instanceof DeviceTerminationMsg) {
+            deviceLiveTime.remove(((DeviceTerminationMsg) msg).getDeviceId());
+            ActorRef ref = deviceActors.remove(((DeviceTerminationMsg) msg).getDeviceId());
+            if (ref != null) {
                 //TODO 打日志
-            }else{
+            } else {
                 //TODO 打日志
             }
-        }else if(msg instanceof FromServerMsg){
-            process((FromServerMsg)msg);
-        }else if(msg instanceof BasicFromServerMsg) {
-            process((BasicFromServerMsg)msg);
+        } else if (msg instanceof FromServerMsg) {
+            process((FromServerMsg) msg);
+        } else if (msg instanceof BasicFromServerMsg) {
+            process((BasicFromServerMsg) msg);
         }
     }
 
     private void process(FromServerMsg msg) {
-        if(msg.getMsgType().equals(MsgType.FROM_SERVER_RPC_MSG)){
-            String deviceId = ((BasicFromServerRpcMsg)msg).getDeviceId();
-            if(deviceActors.containsKey(deviceId)){
-                deviceActors.get(deviceId).tell(msg,ActorRef.noSender());
-            }else{
-                ((BasicFromServerRpcMsg)msg).getRes().setResult(new ResponseEntity(DEVICE_OFFLINE,HttpStatus.OK));
+        if (msg.getMsgType().equals(MsgType.FROM_SERVER_RPC_MSG)) {
+            String deviceId = ((BasicFromServerRpcMsg) msg).getDeviceId();
+            if (deviceActors.containsKey(deviceId)) {
+                deviceActors.get(deviceId).tell(msg, ActorRef.noSender());
+            } else {
+                ((BasicFromServerRpcMsg) msg).getRes().setResult(new ResponseEntity(DEVICE_OFFLINE, HttpStatus.OK));
             }
         }
     }
 
-    private void process(BasicFromServerMsg msg){
+    private void process(BasicFromServerMsg msg) {
         JsonObject jsonObject = new JsonObject();
-        List<String> deviceIds= msg.getDeviceIds();
-        for(String deviceId:deviceIds){
-            if(deviceActors.containsKey(deviceId)){
-                jsonObject.addProperty(deviceId,"online");
-            }else {
-                jsonObject.addProperty(deviceId,"offline");
+        List<String> deviceIds = msg.getDeviceIds();
+        for (String deviceId : deviceIds) {
+            if (deviceActors.containsKey(deviceId)) {
+                jsonObject.addProperty(deviceId, "online");
+            } else {
+                jsonObject.addProperty(deviceId, "offline");
             }
         }
-        msg.getRes().setResult(new ResponseEntity(jsonObject.toString(),HttpStatus.OK));
+        msg.getRes().setResult(new ResponseEntity(jsonObject.toString(), HttpStatus.OK));
     }
 
     private ActorRef getOrCreateDeviceActor(String deviceId) {
@@ -110,14 +110,14 @@ public class TenantActor extends ContextAwareActor {
         private final transient ActorSystemContext context;
         private final String tenantId;
 
-        public ActorCreator(ActorSystemContext context,String tenantId) {
+        public ActorCreator(ActorSystemContext context, String tenantId) {
             this.context = context;
             this.tenantId = tenantId;
         }
 
         @Override
         public TenantActor create() throws Exception {
-            return new TenantActor(context,tenantId);
+            return new TenantActor(context, tenantId);
         }
     }
 }

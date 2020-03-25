@@ -57,7 +57,7 @@ public class Event extends BaseData implements BaseEntity {
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
         sb.append("\"id\":")
-                .append("\""+id+"\"");
+                .append("\"" + id + "\"");
         sb.append(",\"tenantId\":")
                 .append(tenantId);
         sb.append(",\"entityType\":")
@@ -73,9 +73,9 @@ public class Event extends BaseData implements BaseEntity {
     }
 
     @Override
-    public long getCreatedTime(){
+    public long getCreatedTime() {
         Long createdTime = id.timestamp();
-        createdTime = createdTime/10000000L - 12219292800L;
+        createdTime = createdTime / 10000000L - 12219292800L;
         return createdTime;
     }
 }

@@ -47,7 +47,7 @@ public class LongDataEntry extends BasicKvEntry {
                 "value=" + value +
                 "} " + super.toString();
     }
-    
+
     @Override
     public String getValueAsString() {
         return Long.toString(value);

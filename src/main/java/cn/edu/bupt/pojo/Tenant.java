@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
 /**
  * Created by Administrator on 2018/4/16.
  */
@@ -11,7 +12,7 @@ import javax.persistence.Id;
 public class Tenant {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String address;
     private String phone;
@@ -71,7 +72,7 @@ public class Tenant {
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
         sb.append("\"id\":")
-                .append("\""+id+"\"");
+                .append("\"" + id + "\"");
         sb.append(",\"address\":\"")
                 .append(address).append('\"');
         sb.append(",\"phone\":\"")

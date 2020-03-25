@@ -14,8 +14,7 @@ public class BasicFromServerMsg {
     @Getter
     private final DeferredResult<ResponseEntity> res;
 
-    public BasicFromServerMsg(String tenantId,List<String> deviceIds, DeferredResult<ResponseEntity> res)
-    {
+    public BasicFromServerMsg(String tenantId, List<String> deviceIds, DeferredResult<ResponseEntity> res) {
         this.tenantId = tenantId;
         this.deviceIds = deviceIds;
         this.res = res;

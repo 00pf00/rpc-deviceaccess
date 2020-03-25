@@ -21,26 +21,6 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
  */
 public abstract class CassandraAbstractSearchTimeDao<E extends BaseEntity> extends CassandraAbstractModelDao<E> {
 
-    protected List<E> findPageWithTimeSearch(String searchView, List<Clause> clauses, TimePageLink pageLink) {
-        return findPageWithTimeSearch(searchView, clauses, Collections.emptyList(), pageLink);
-    }
-
-    protected List<E> findPageWithTimeSearch(String searchView, List<Clause> clauses, Ordering ordering, TimePageLink pageLink) {
-        return findPageWithTimeSearch(searchView, clauses, Collections.singletonList(ordering), pageLink);
-    }
-
-    protected List<E> findPageWithTimeSearch(String searchView, List<Clause> clauses, List<Ordering> topLevelOrderings, TimePageLink pageLink) {
-        return findPageWithTimeSearch(searchView, clauses, topLevelOrderings, pageLink, ModelConstants.ID_PROPERTY);
-    }
-
-    protected List<E> findPageWithTimeSearch(String searchView, List<Clause> clauses, TimePageLink pageLink, String idColumn) {
-        return findPageWithTimeSearch(searchView, clauses, Collections.emptyList(), pageLink, idColumn);
-    }
-
-    protected List<E> findPageWithTimeSearch(String searchView, List<Clause> clauses, List<Ordering> topLevelOrderings, TimePageLink pageLink, String idColumn) {
-        return findListByStatement(buildQuery(searchView, clauses, topLevelOrderings, pageLink, idColumn));
-    }
-
     public static Select.Where buildQuery(String searchView, List<Clause> clauses, TimePageLink pageLink, String idColumn) {
         return buildQuery(searchView, clauses, Collections.emptyList(), pageLink, idColumn);
     }
@@ -87,5 +67,25 @@ public abstract class CassandraAbstractSearchTimeDao<E extends BaseEntity> exten
         }
         query.orderBy(orderings.toArray(new Ordering[orderings.size()]));
         return query;
+    }
+
+    protected List<E> findPageWithTimeSearch(String searchView, List<Clause> clauses, TimePageLink pageLink) {
+        return findPageWithTimeSearch(searchView, clauses, Collections.emptyList(), pageLink);
+    }
+
+    protected List<E> findPageWithTimeSearch(String searchView, List<Clause> clauses, Ordering ordering, TimePageLink pageLink) {
+        return findPageWithTimeSearch(searchView, clauses, Collections.singletonList(ordering), pageLink);
+    }
+
+    protected List<E> findPageWithTimeSearch(String searchView, List<Clause> clauses, List<Ordering> topLevelOrderings, TimePageLink pageLink) {
+        return findPageWithTimeSearch(searchView, clauses, topLevelOrderings, pageLink, ModelConstants.ID_PROPERTY);
+    }
+
+    protected List<E> findPageWithTimeSearch(String searchView, List<Clause> clauses, TimePageLink pageLink, String idColumn) {
+        return findPageWithTimeSearch(searchView, clauses, Collections.emptyList(), pageLink, idColumn);
+    }
+
+    protected List<E> findPageWithTimeSearch(String searchView, List<Clause> clauses, List<Ordering> topLevelOrderings, TimePageLink pageLink, String idColumn) {
+        return findListByStatement(buildQuery(searchView, clauses, topLevelOrderings, pageLink, idColumn));
     }
 }

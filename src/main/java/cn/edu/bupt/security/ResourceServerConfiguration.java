@@ -17,25 +17,25 @@ import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 @EnableResourceServer
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 
+    private static String Client_id;
+    private static String Client_secret;
+    private static String checkurl;
+
     @Value("${account.client_id}")
     private void getClientId(String client_id) {
-        Client_id = client_id ;
+        Client_id = client_id;
     }
 
     @Value("${account.client_secret}")
     private void getClientSecret(String client_secret) {
-        Client_secret = client_secret ;
+        Client_secret = client_secret;
     }
 
     @Value("${account.check_url}")
     private void getCheck(String checkUrl) {
         System.out.println(checkUrl);
-        checkurl = checkUrl ;
+        checkurl = checkUrl;
     }
-
-    private static String Client_id;
-    private static String Client_secret;
-    private static String checkurl;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {

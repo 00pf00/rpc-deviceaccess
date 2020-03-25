@@ -58,9 +58,9 @@ public class MqttTransportService {
     private Integer workerGroupThreadCount;
 
     @PostConstruct
-    public void init() throws Exception{
+    public void init() throws Exception {
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.valueOf(leakDetectorLevel.toUpperCase()));
-       // this.adaptor = (TransportAdaptor) appContext.getBean(adaptorName);
+        // this.adaptor = (TransportAdaptor) appContext.getBean(adaptorName);
         this.adaptor = new JsonMqttAdaptor();
 
         bossGroup = new NioEventLoopGroup(bossGroupThreadCount);
@@ -68,7 +68,7 @@ public class MqttTransportService {
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .childHandler(new MqttTransportServerInitializer(processor, deviceService, deviceAuthService,adaptor));
+                .childHandler(new MqttTransportServerInitializer(processor, deviceService, deviceAuthService, adaptor));
 
         serverChannel = b.bind(port).sync().channel();
     }

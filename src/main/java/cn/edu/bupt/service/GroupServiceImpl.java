@@ -20,12 +20,48 @@ import static cn.edu.bupt.dao.util.Validator.validatePageLink;
  * Created by CZX on 2018/4/19.
  */
 @Service
-public class GroupServiceImpl implements GroupService{
+public class GroupServiceImpl implements GroupService {
     @Autowired
     private GroupDao groupDao;
 
     @Autowired
     private DeviceService deviceService;
+    private DataValidator<Group> groupValidator =
+            new DataValidator<Group>() {
+
+                @Override
+                protected void validateCreate(Group group) {
+                    groupDao.findGroupByTenantAndCustomerIdAndName(group.getTenantId(), group.getCustomerId(), group.getName()).ifPresent(
+                            c -> {
+                                throw new DataValidationException("Group with such name already exists!");
+                            }
+                    );
+                }
+
+                @Override
+                protected void validateUpdate(Group group) {
+                    groupDao.findGroupByTenantAndCustomerIdAndName(group.getTenantId(), group.getCustomerId(), group.getName()).ifPresent(
+                            c -> {
+                                if (!c.getId().equals(group.getId())) {
+                                    throw new DataValidationException("Group with such name already exists!");
+                                }
+                            }
+                    );
+                }
+
+                @Override
+                protected void validateDataImpl(Group group) {
+                    if (StringUtils.isEmpty(group.getName())) {
+                        throw new DataValidationException("Group name should be specified!");
+                    }
+                    if (group.getTenantId() == null) {
+                        throw new DataValidationException("Group should be assigned to tenant!");
+                    }
+                    if (group.getCustomerId() == null) {
+                        group.setCustomerId(1);
+                    }
+                }
+            };
 
     @Override
     public Group saveGroup(Group group) {
@@ -67,41 +103,4 @@ public class GroupServiceImpl implements GroupService{
         deviceService.unassignDevicesByGroupId(groupId);
         groupDao.removeById(groupId);
     }
-
-    private DataValidator<Group> groupValidator =
-            new DataValidator<Group>() {
-
-                @Override
-                protected void validateCreate(Group group) {
-                    groupDao.findGroupByTenantAndCustomerIdAndName(group.getTenantId(), group.getCustomerId(),  group.getName()).ifPresent(
-                            c -> {
-                                throw new DataValidationException("Group with such name already exists!");
-                            }
-                    );
-                }
-
-                @Override
-                protected void validateUpdate(Group group) {
-                    groupDao.findGroupByTenantAndCustomerIdAndName(group.getTenantId(), group.getCustomerId(),  group.getName()).ifPresent(
-                            c -> {
-                                if (!c.getId().equals(group.getId())) {
-                                    throw new DataValidationException("Group with such name already exists!");
-                                }
-                            }
-                    );
-                }
-
-                @Override
-                protected void validateDataImpl(Group group) {
-                    if (StringUtils.isEmpty(group.getName())) {
-                        throw new DataValidationException("Group name should be specified!");
-                    }
-                    if (group.getTenantId() == null) {
-                        throw new DataValidationException("Group should be assigned to tenant!");
-                    }
-                    if (group.getCustomerId() == null) {
-                        group.setCustomerId(1);
-                    }
-                }
-            };
 }

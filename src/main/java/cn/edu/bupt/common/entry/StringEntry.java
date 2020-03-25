@@ -10,10 +10,11 @@ import java.util.Optional;
 public class StringEntry extends BasicTelemetryKvEntry {
     private String value;
 
-    public StringEntry(String key,String value) {
+    public StringEntry(String key, String value) {
         super(key);
         this.value = value;
     }
+
     @Override
     public Optional<String> getStrValue() {
         return Optional.of(value);
@@ -34,7 +35,7 @@ public class StringEntry extends BasicTelemetryKvEntry {
         return value;
     }
 
-    public void setValue(String value){
+    public void setValue(String value) {
         this.value = value;
     }
 

@@ -50,7 +50,7 @@ public class AggregatePartitionsFunction implements com.google.common.base.Funct
                 }
             }
             return processAggregationResult(aggResult);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("[{}][{}][{}] Failed to aggregate data", key, ts, aggregation, e);
             return Optional.empty();
         }

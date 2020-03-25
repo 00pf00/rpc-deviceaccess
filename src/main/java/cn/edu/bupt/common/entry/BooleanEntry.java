@@ -9,9 +9,9 @@ import java.util.Optional;
  */
 public class BooleanEntry extends BasicTelemetryKvEntry {
 
-    private final Boolean  value ;
+    private final Boolean value;
 
-    public BooleanEntry(String key,Boolean value){
+    public BooleanEntry(String key, Boolean value) {
         super(key);
         this.value = value;
     }
@@ -20,6 +20,7 @@ public class BooleanEntry extends BasicTelemetryKvEntry {
     public Optional<Boolean> getBooleanValue() {
         return Optional.ofNullable(value);
     }
+
     @Override
     public String getDataType() {
         return KvEntryType.BOOLEAN;

@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 /**
  * Created by CZX on 2018/4/8.
  */
-public interface TenantRepository extends JpaRepository<Tenant, Integer>,JpaSpecificationExecutor<Tenant> {
+public interface TenantRepository extends JpaRepository<Tenant, Integer>, JpaSpecificationExecutor<Tenant> {
 
 }

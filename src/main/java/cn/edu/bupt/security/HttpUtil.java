@@ -19,45 +19,25 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class HttpUtil {
 
-    private static Token token = new Token();
-
-    @Value("${account.login_url}")
-    private void getLogin(String loginUrl) {
-        System.out.println(loginUrl);
-        tokenurl = loginUrl ;
-    }
-
-    @Value("${account.check_url}")
-    private void getCheck(String checkUrl) {
-        System.out.println(checkUrl);
-        checkurl = checkUrl ;
-    }
-
-
-    @Value("${account.internal_client_id}")
-    private void getInternalClientId(String internal_client_id) {
-        Internal_client_id = internal_client_id ;
-    }
-
-    @Value("${account.internal_client_secret}")
-    private void getInternalClientSecret(String internal_client_secret) {
-        Internal_client_secret = internal_client_secret ;
-    }
-
     private static final Base64.Encoder encoder = Base64.getEncoder();
     private static final OkHttpClient httpClient = new OkHttpClient();
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final MediaType FORM = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
+    private static final OkHttpClient mOkHttpClient = new OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
+            .build();
+    private static Token token = new Token();
     private static String tokenurl;
     private static String checkurl;
     private static String Internal_client_id;
     private static String Internal_client_secret;
 
-    public static String getAccessToken(){
+    public static String getAccessToken() {
 
-        if(token.getExpires_at() < System.currentTimeMillis() / 1000) {
+        if (token.getExpires_at() < System.currentTimeMillis() / 1000) {
             synchronized (HttpUtil.class) {
-                if(token.getExpires_at() < System.currentTimeMillis() / 1000) {
+                if (token.getExpires_at() < System.currentTimeMillis() / 1000) {
                     Request.Builder builder = new Request.Builder()
                             .url(tokenurl + "?grant_type=client_credentials")
                             .post(RequestBody.create(null, ""));
@@ -92,21 +72,20 @@ public class HttpUtil {
                             return "ERROR!";
                         }
                     }
-                }else {
+                } else {
                     return token.getAccess_token();
                 }
             }
-        }else{
+        } else {
             return token.getAccess_token();
         }
     }
 
-
-    public static String sendPost(String url, Map<String,String> headers, JsonObject requestBody) throws Exception{
-        String str ;
-        if(requestBody==null){
+    public static String sendPost(String url, Map<String, String> headers, JsonObject requestBody) throws Exception {
+        String str;
+        if (requestBody == null) {
             str = "";
-        }else{
+        } else {
             str = requestBody.toString();
         }
         RequestBody body = RequestBody.create(JSON, str);
@@ -115,11 +94,11 @@ public class HttpUtil {
                 .post(body);
 
         String tocken = getAccessToken();
-        buider.header("Authorization","Bearer "+tocken);
+        buider.header("Authorization", "Bearer " + tocken);
 
-        if(headers!=null){
-            for(Map.Entry<String,String> entry:headers.entrySet()){
-                buider.header(entry.getKey(),entry.getValue());
+        if (headers != null) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                buider.header(entry.getKey(), entry.getValue());
             }
         }
         Request request = buider.build();
@@ -127,11 +106,11 @@ public class HttpUtil {
         return sendRequireToThingsboard(request);
     }
 
-    public static String sendPut(String url, Map<String,String> headers, JsonObject requestBody) throws Exception{
-        String str ;
-        if(requestBody==null){
+    public static String sendPut(String url, Map<String, String> headers, JsonObject requestBody) throws Exception {
+        String str;
+        if (requestBody == null) {
             str = "";
-        }else{
+        } else {
             str = requestBody.toString();
         }
         RequestBody body = RequestBody.create(JSON, str);
@@ -140,11 +119,11 @@ public class HttpUtil {
                 .put(body);
 
         String tocken = getAccessToken();
-        buider.header("Authorization","Bearer "+tocken);
+        buider.header("Authorization", "Bearer " + tocken);
 
-        if(headers!=null){
-            for(Map.Entry<String,String> entry:headers.entrySet()){
-                buider.header(entry.getKey(),entry.getValue());
+        if (headers != null) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                buider.header(entry.getKey(), entry.getValue());
             }
         }
         Request request = buider.build();
@@ -152,30 +131,30 @@ public class HttpUtil {
         return sendRequireToThingsboard(request);
     }
 
-    public static String sendDelete(String url) throws Exception{
+    public static String sendDelete(String url) throws Exception {
         Request.Builder buider = new Request.Builder()
                 .url(url)
-                .delete() ;
+                .delete();
 
         String tocken = getAccessToken();
-        buider.header("Authorization","Bearer "+tocken);
+        buider.header("Authorization", "Bearer " + tocken);
         Request request = buider.build();
 
         return sendRequireToThingsboard(request);
     }
 
-    public static String sendGet(String url, Map<String,String> headers) throws Exception{
+    public static String sendGet(String url, Map<String, String> headers) throws Exception {
 
         Request.Builder buider = new Request.Builder()
                 .url(url)
-                .get() ;
+                .get();
 
         String tocken = getAccessToken();
-        buider.header("Authorization","Bearer "+tocken);
+        buider.header("Authorization", "Bearer " + tocken);
 
-        if(headers!=null){
-            for(Map.Entry<String,String> entry:headers.entrySet()){
-                buider.header(entry.getKey(),entry.getValue());
+        if (headers != null) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                buider.header(entry.getKey(), entry.getValue());
             }
         }
         Request request = buider.build();
@@ -183,23 +162,41 @@ public class HttpUtil {
         return sendRequireToThingsboard(request);
     }
 
-    private static String sendRequireToThingsboard(Request request) throws Exception{
+    private static String sendRequireToThingsboard(Request request) throws Exception {
         Response response = httpClient.newCall(request).execute();
         return response.body().string();
     }
 
     /**
      * 同步方法
+     *
      * @param request
      * @return
      * @throws IOException
      */
     public static Response execute(Request request) throws IOException {
-        return mOkHttpClient.newCall(request).execute() ;
+        return mOkHttpClient.newCall(request).execute();
     }
 
-    private static final OkHttpClient mOkHttpClient = new OkHttpClient.Builder()
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(20, TimeUnit.SECONDS)
-            .build();
+    @Value("${account.login_url}")
+    private void getLogin(String loginUrl) {
+        System.out.println(loginUrl);
+        tokenurl = loginUrl;
+    }
+
+    @Value("${account.check_url}")
+    private void getCheck(String checkUrl) {
+        System.out.println(checkUrl);
+        checkurl = checkUrl;
+    }
+
+    @Value("${account.internal_client_id}")
+    private void getInternalClientId(String internal_client_id) {
+        Internal_client_id = internal_client_id;
+    }
+
+    @Value("${account.internal_client_secret}")
+    private void getInternalClientSecret(String internal_client_secret) {
+        Internal_client_secret = internal_client_secret;
+    }
 }

@@ -6,17 +6,17 @@ import cn.edu.bupt.pojo.Device;
 /**
  * Created by Administrator on 2018/4/17.
  */
-public class BasicToDeviceActorSessionMsg implements FromSessionActorToDeviceActorMsg{
+public class BasicToDeviceActorSessionMsg implements FromSessionActorToDeviceActorMsg {
 
     private final SessionAwareMsg msg;
     private final Device device;
 
-    public BasicToDeviceActorSessionMsg(SessionAwareMsg msg,Device device){
+    public BasicToDeviceActorSessionMsg(SessionAwareMsg msg, Device device) {
         this.msg = msg;
         this.device = device;
     }
 
-    public SessionAwareMsg getMsg(){
+    public SessionAwareMsg getMsg() {
         return msg;
     }
 

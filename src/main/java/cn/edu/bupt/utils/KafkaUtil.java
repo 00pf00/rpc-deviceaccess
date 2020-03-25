@@ -1,32 +1,39 @@
 package cn.edu.bupt.utils;
 
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.clients.producer.Callback;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+
+import java.util.Properties;
 
 /**
  * Created by Administrator on 2018/4/25.
  */
 public class KafkaUtil {
-    private static KfkProducer<String,String> kfkProducer = new KfkProducer<>("producerConfigDemo");
-    public static void send(String key,String value){
-        kfkProducer.send(key,value);
+    private static KfkProducer<String, String> kfkProducer = new KfkProducer<>("producerConfigDemo");
+
+    public static void send(String key, String value) {
+        kfkProducer.send(key, value);
     }
 }
+
 class KfkProducer<K, V> {
 
-    @Getter@Setter
+    @Getter
+    @Setter
     private Producer<K, V> producer;
-    @Getter@Setter
+    @Getter
+    @Setter
     private Properties props;
-    @Getter@Setter
+    @Getter
+    @Setter
     private String producerName;
-    @Getter@Setter
+    @Getter
+    @Setter
     private String topic;
 
     public KfkProducer() {
@@ -39,9 +46,9 @@ class KfkProducer<K, V> {
         loadProducer(props);
     }
 
-    public KfkProducer(String yamlPath,String producerName) {
+    public KfkProducer(String yamlPath, String producerName) {
         this.producerName = producerName;
-        loadProperties(yamlPath,producerName);
+        loadProperties(yamlPath, producerName);
         loadProducer(props);
     }
 
@@ -77,6 +84,12 @@ class KfkProducer<K, V> {
 //        this.producer = producer;
 //    }
 
+    // 测试
+    public static void main(String args[]) {
+        KfkProducer<String, String> producerrr = new KfkProducer<String, String>("producerTest");
+        producerrr.send("qwer", "asdf");
+        producerrr.close();
+    }
 
     public Properties loadProperties(String prodecerName) {
         AnalysisYaml analysisYaml = new AnalysisYaml();
@@ -98,8 +111,7 @@ class KfkProducer<K, V> {
         return props;
     }
 
-
-    public Properties loadProperties(String yamlPath,String prodecerName) {
+    public Properties loadProperties(String yamlPath, String prodecerName) {
         AnalysisYaml analysisYaml = new AnalysisYaml(yamlPath);
         ProducerProperties producerProperties = analysisYaml.getProducerProperties(producerName);
         if (producerProperties == null) {
@@ -119,7 +131,6 @@ class KfkProducer<K, V> {
         return props;
     }
 
-
     public Producer loadProducer(Properties props) {
         if (props == null) {
             System.out.println("Properties为空");
@@ -130,7 +141,6 @@ class KfkProducer<K, V> {
         return producer;
     }
 
-
     public void send(K key, V value) {
         if (producer == null) {
             System.out.println("Producer为空,Properties未装载");
@@ -138,7 +148,6 @@ class KfkProducer<K, V> {
         }
         producer.send(new ProducerRecord<K, V>(topic, key, value));
     }
-
 
     public void sendWithCallback(K key, V value, Callback callback) {
         if (producer == null) {
@@ -150,19 +159,11 @@ class KfkProducer<K, V> {
 
     /**
      * 关闭生产者
-     *
      */
     public void close() {
         if (producer != null) {
             producer.close();
         }
-    }
-
-    // 测试
-    public static void main(String args[]) {
-        KfkProducer<String, String> producerrr = new KfkProducer<String, String>("producerTest");
-        producerrr.send("qwer", "asdf");
-        producerrr.close();
     }
 
 }

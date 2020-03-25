@@ -7,5 +7,6 @@ import cn.edu.bupt.common.security.DeviceCredentialsType;
  */
 public interface DeviceCredentals {
     String getCredentialsId();
+
     DeviceCredentialsType getCredentialsType();
 }

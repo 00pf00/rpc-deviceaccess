@@ -6,7 +6,6 @@ import cn.edu.bupt.pojo.event.Event;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Created by CZX on 2018/5/28.
@@ -53,10 +52,10 @@ public interface EventDao extends Dao<Event> {
     /**
      * Find events by tenantId, entityId, eventType and pageLink.
      *
-     * @param tenantId the tenantId
-     * @param entityId the entityId
+     * @param tenantId  the tenantId
+     * @param entityId  the entityId
      * @param eventType the eventType
-     * @param pageLink the pageLink
+     * @param pageLink  the pageLink
      * @return the event list
      */
     List<Event> findEvents(Integer tenantId, String entityId, String eventType, TimePageLink pageLink);

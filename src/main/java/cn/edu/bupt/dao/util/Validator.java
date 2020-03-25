@@ -12,7 +12,7 @@ public class Validator {
      * This method validate <code>EntityId</code> entity id. If entity id is invalid than throw
      * <code>IncorrectParameterException</code> exception
      *
-     * @param entityId          the entityId
+     * @param entityId     the entityId
      * @param errorMessage the error message for exception
      */
     public static void validateEntityId(UUID entityId, String errorMessage) {

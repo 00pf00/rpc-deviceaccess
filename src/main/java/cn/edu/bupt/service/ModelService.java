@@ -11,7 +11,7 @@ public class ModelService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public Model getModel(String manufacturer_name, String device_type_name, String model_name){
+    public Model getModel(String manufacturer_name, String device_type_name, String model_name) {
         return modelMapper.getModel(manufacturer_name, device_type_name, model_name);
     }
 }

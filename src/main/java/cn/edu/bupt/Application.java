@@ -18,7 +18,6 @@ public class Application {
     public static void main(String[] args) {
         ElasticsearchRestClient.initElasticsearchRestClient("device-access");
         SpringApplication.run(Application.class, args);
-        System.out.println("8888888888888888888888888888888888888");
         ChannelServer.getInstance().initChannelServer(7000);
     }
 }

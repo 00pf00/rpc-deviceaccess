@@ -161,6 +161,12 @@ public final class DeviceRespProto {
      * @return The createdTime.
      */
     long getCreatedTime();
+
+    /**
+     * <code>int64 searchTextSource = 15;</code>
+     * @return The searchTextSource.
+     */
+    long getSearchTextSource();
   }
   /**
    * Protobuf type {@code DeviceResp}
@@ -295,6 +301,11 @@ public final class DeviceRespProto {
             case 112: {
 
               createdTime_ = input.readInt64();
+              break;
+            }
+            case 120: {
+
+              searchTextSource_ = input.readInt64();
               break;
             }
             default: {
@@ -729,6 +740,16 @@ public final class DeviceRespProto {
       return createdTime_;
     }
 
+    public static final int SEARCHTEXTSOURCE_FIELD_NUMBER = 15;
+    private long searchTextSource_;
+    /**
+     * <code>int64 searchTextSource = 15;</code>
+     * @return The searchTextSource.
+     */
+    public long getSearchTextSource() {
+      return searchTextSource_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -785,6 +806,9 @@ public final class DeviceRespProto {
       if (createdTime_ != 0L) {
         output.writeInt64(14, createdTime_);
       }
+      if (searchTextSource_ != 0L) {
+        output.writeInt64(15, searchTextSource_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -840,6 +864,10 @@ public final class DeviceRespProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(14, createdTime_);
       }
+      if (searchTextSource_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(15, searchTextSource_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -883,6 +911,8 @@ public final class DeviceRespProto {
           != other.getLifeTime()) return false;
       if (getCreatedTime()
           != other.getCreatedTime()) return false;
+      if (getSearchTextSource()
+          != other.getSearchTextSource()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -924,6 +954,9 @@ public final class DeviceRespProto {
       hash = (37 * hash) + CREATEDTIME_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getCreatedTime());
+      hash = (37 * hash) + SEARCHTEXTSOURCE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getSearchTextSource());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1085,6 +1118,8 @@ public final class DeviceRespProto {
 
         createdTime_ = 0L;
 
+        searchTextSource_ = 0L;
+
         return this;
       }
 
@@ -1125,6 +1160,7 @@ public final class DeviceRespProto {
         result.siteId_ = siteId_;
         result.lifeTime_ = lifeTime_;
         result.createdTime_ = createdTime_;
+        result.searchTextSource_ = searchTextSource_;
         onBuilt();
         return result;
       }
@@ -1224,6 +1260,9 @@ public final class DeviceRespProto {
         }
         if (other.getCreatedTime() != 0L) {
           setCreatedTime(other.getCreatedTime());
+        }
+        if (other.getSearchTextSource() != 0L) {
+          setSearchTextSource(other.getSearchTextSource());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -2133,6 +2172,36 @@ public final class DeviceRespProto {
         onChanged();
         return this;
       }
+
+      private long searchTextSource_ ;
+      /**
+       * <code>int64 searchTextSource = 15;</code>
+       * @return The searchTextSource.
+       */
+      public long getSearchTextSource() {
+        return searchTextSource_;
+      }
+      /**
+       * <code>int64 searchTextSource = 15;</code>
+       * @param value The searchTextSource to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSearchTextSource(long value) {
+        
+        searchTextSource_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 searchTextSource = 15;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSearchTextSource() {
+        
+        searchTextSource_ = 0L;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -2200,15 +2269,16 @@ public final class DeviceRespProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\020DeviceResp.proto\"\211\002\n\nDeviceResp\022\n\n\002id\030" +
+      "\n\020DeviceResp.proto\"\243\002\n\nDeviceResp\022\n\n\002id\030" +
       "\001 \001(\t\022\020\n\010tenantId\030\002 \001(\005\022\022\n\ncustomerId\030\003 " +
       "\001(\005\022\014\n\004name\030\004 \001(\t\022\022\n\nsearchText\030\005 \001(\t\022\026\n" +
       "\016parentDeviceId\030\006 \001(\t\022\022\n\ndeviceType\030\007 \001(" +
       "\t\022\023\n\013manufacture\030\010 \001(\t\022\r\n\005model\030\t \001(\t\022\016\n" +
       "\006status\030\n \001(\t\022\020\n\010location\030\013 \001(\t\022\016\n\006siteI" +
       "d\030\014 \001(\t\022\020\n\010lifeTime\030\r \001(\003\022\023\n\013createdTime" +
-      "\030\016 \001(\003B*\n\024cn.edu.bupt.protobufB\017DeviceRe" +
-      "spProto\210\001\001b\006proto3"
+      "\030\016 \001(\003\022\030\n\020searchTextSource\030\017 \001(\003B*\n\024cn.e" +
+      "du.bupt.protobufB\017DeviceRespProto\210\001\001b\006pr" +
+      "oto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -2219,7 +2289,7 @@ public final class DeviceRespProto {
     internal_static_DeviceResp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_DeviceResp_descriptor,
-        new java.lang.String[] { "Id", "TenantId", "CustomerId", "Name", "SearchText", "ParentDeviceId", "DeviceType", "Manufacture", "Model", "Status", "Location", "SiteId", "LifeTime", "CreatedTime", });
+        new java.lang.String[] { "Id", "TenantId", "CustomerId", "Name", "SearchText", "ParentDeviceId", "DeviceType", "Manufacture", "Model", "Status", "Location", "SiteId", "LifeTime", "CreatedTime", "SearchTextSource", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

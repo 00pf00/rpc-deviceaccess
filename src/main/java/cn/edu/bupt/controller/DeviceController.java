@@ -9,11 +9,11 @@ import cn.edu.bupt.dao.page.TextPageData;
 import cn.edu.bupt.dao.page.TextPageLink;
 import cn.edu.bupt.message.BasicFromServerMsg;
 import cn.edu.bupt.pojo.Device;
-import cn.edu.bupt.protobuf.DeviceProto;
+import cn.edu.bupt.protobuf.DeviceReqProto;
+import cn.edu.bupt.protobuf.DeviceRespProto;
 import cn.edu.bupt.security.model.Authority;
 import cn.edu.bupt.utils.StringUtil;
 import com.alibaba.fastjson.JSON;
-import com.datastax.driver.core.utils.UUIDs;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -62,14 +62,14 @@ public class DeviceController extends BaseController {
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'saveDevice')")
     @RequestMapping(value = "/device", method = RequestMethod.POST)
     @HandlerMapping(path = "/device")
-    public DeviceProto.Device saveDevice(@RequestBody DeviceProto.Device device) throws Exception {
+    public DeviceRespProto.DeviceResp saveDevice(@RequestBody DeviceReqProto.DeviceReq device) throws Exception {
         //将提交表单的形式转为json格式提交
         System.out.println("**************************************************88");
         this.getLog().info("device name = {}", device.getId());
         Device device1 = Convert.toPojo(device, Device.class);
         Device savedDevice = checkNotNull(deviceService.saveDevice(device1));
         deviceService.sendMessage(savedDevice, "新增/更新设备：" + savedDevice.getName());
-        return (DeviceProto.Device) Convert.toProtobuf(savedDevice, DeviceProto.Device.newBuilder());
+        return (DeviceRespProto.DeviceResp) Convert.toProtobuf(savedDevice, DeviceRespProto.DeviceResp.newBuilder());
 
     }
 

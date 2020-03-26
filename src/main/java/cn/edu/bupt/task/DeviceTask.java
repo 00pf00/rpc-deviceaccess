@@ -2,7 +2,6 @@ package cn.edu.bupt.task;
 
 import cn.bupt.edu.server.anotate.TaskMapping;
 import cn.bupt.edu.server.task.DefaultTaskServer;
-import cn.edu.bupt.protobuf.DeviceProto;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.springframework.context.annotation.Scope;

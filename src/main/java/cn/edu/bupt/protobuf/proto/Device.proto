@@ -17,4 +17,5 @@ message Device {
     string location = 11;
     string siteId = 12;
     int64 lifeTime = 13;
+    int64 createdTime =14;
 }

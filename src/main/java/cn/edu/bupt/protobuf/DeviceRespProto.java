@@ -163,10 +163,16 @@ public final class DeviceRespProto {
     long getCreatedTime();
 
     /**
-     * <code>int64 searchTextSource = 15;</code>
+     * <code>string searchTextSource = 15;</code>
      * @return The searchTextSource.
      */
-    long getSearchTextSource();
+    java.lang.String getSearchTextSource();
+    /**
+     * <code>string searchTextSource = 15;</code>
+     * @return The bytes for searchTextSource.
+     */
+    com.google.protobuf.ByteString
+        getSearchTextSourceBytes();
   }
   /**
    * Protobuf type {@code DeviceResp}
@@ -191,6 +197,7 @@ public final class DeviceRespProto {
       status_ = "";
       location_ = "";
       siteId_ = "";
+      searchTextSource_ = "";
     }
 
     @java.lang.Override
@@ -303,9 +310,10 @@ public final class DeviceRespProto {
               createdTime_ = input.readInt64();
               break;
             }
-            case 120: {
+            case 122: {
+              java.lang.String s = input.readStringRequireUtf8();
 
-              searchTextSource_ = input.readInt64();
+              searchTextSource_ = s;
               break;
             }
             default: {
@@ -741,13 +749,39 @@ public final class DeviceRespProto {
     }
 
     public static final int SEARCHTEXTSOURCE_FIELD_NUMBER = 15;
-    private long searchTextSource_;
+    private volatile java.lang.Object searchTextSource_;
     /**
-     * <code>int64 searchTextSource = 15;</code>
+     * <code>string searchTextSource = 15;</code>
      * @return The searchTextSource.
      */
-    public long getSearchTextSource() {
-      return searchTextSource_;
+    public java.lang.String getSearchTextSource() {
+      java.lang.Object ref = searchTextSource_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        searchTextSource_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string searchTextSource = 15;</code>
+     * @return The bytes for searchTextSource.
+     */
+    public com.google.protobuf.ByteString
+        getSearchTextSourceBytes() {
+      java.lang.Object ref = searchTextSource_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        searchTextSource_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     private byte memoizedIsInitialized = -1;
@@ -806,8 +840,8 @@ public final class DeviceRespProto {
       if (createdTime_ != 0L) {
         output.writeInt64(14, createdTime_);
       }
-      if (searchTextSource_ != 0L) {
-        output.writeInt64(15, searchTextSource_);
+      if (!getSearchTextSourceBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 15, searchTextSource_);
       }
       unknownFields.writeTo(output);
     }
@@ -864,9 +898,8 @@ public final class DeviceRespProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(14, createdTime_);
       }
-      if (searchTextSource_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(15, searchTextSource_);
+      if (!getSearchTextSourceBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(15, searchTextSource_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -911,8 +944,8 @@ public final class DeviceRespProto {
           != other.getLifeTime()) return false;
       if (getCreatedTime()
           != other.getCreatedTime()) return false;
-      if (getSearchTextSource()
-          != other.getSearchTextSource()) return false;
+      if (!getSearchTextSource()
+          .equals(other.getSearchTextSource())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -955,8 +988,7 @@ public final class DeviceRespProto {
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getCreatedTime());
       hash = (37 * hash) + SEARCHTEXTSOURCE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getSearchTextSource());
+      hash = (53 * hash) + getSearchTextSource().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1118,7 +1150,7 @@ public final class DeviceRespProto {
 
         createdTime_ = 0L;
 
-        searchTextSource_ = 0L;
+        searchTextSource_ = "";
 
         return this;
       }
@@ -1261,8 +1293,9 @@ public final class DeviceRespProto {
         if (other.getCreatedTime() != 0L) {
           setCreatedTime(other.getCreatedTime());
         }
-        if (other.getSearchTextSource() != 0L) {
-          setSearchTextSource(other.getSearchTextSource());
+        if (!other.getSearchTextSource().isEmpty()) {
+          searchTextSource_ = other.searchTextSource_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -2173,32 +2206,78 @@ public final class DeviceRespProto {
         return this;
       }
 
-      private long searchTextSource_ ;
+      private java.lang.Object searchTextSource_ = "";
       /**
-       * <code>int64 searchTextSource = 15;</code>
+       * <code>string searchTextSource = 15;</code>
        * @return The searchTextSource.
        */
-      public long getSearchTextSource() {
-        return searchTextSource_;
+      public java.lang.String getSearchTextSource() {
+        java.lang.Object ref = searchTextSource_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          searchTextSource_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
       /**
-       * <code>int64 searchTextSource = 15;</code>
+       * <code>string searchTextSource = 15;</code>
+       * @return The bytes for searchTextSource.
+       */
+      public com.google.protobuf.ByteString
+          getSearchTextSourceBytes() {
+        java.lang.Object ref = searchTextSource_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          searchTextSource_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string searchTextSource = 15;</code>
        * @param value The searchTextSource to set.
        * @return This builder for chaining.
        */
-      public Builder setSearchTextSource(long value) {
-        
+      public Builder setSearchTextSource(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
         searchTextSource_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>int64 searchTextSource = 15;</code>
+       * <code>string searchTextSource = 15;</code>
        * @return This builder for chaining.
        */
       public Builder clearSearchTextSource() {
         
-        searchTextSource_ = 0L;
+        searchTextSource_ = getDefaultInstance().getSearchTextSource();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string searchTextSource = 15;</code>
+       * @param value The bytes for searchTextSource to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSearchTextSourceBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        searchTextSource_ = value;
         onChanged();
         return this;
       }
@@ -2276,7 +2355,7 @@ public final class DeviceRespProto {
       "\t\022\023\n\013manufacture\030\010 \001(\t\022\r\n\005model\030\t \001(\t\022\016\n" +
       "\006status\030\n \001(\t\022\020\n\010location\030\013 \001(\t\022\016\n\006siteI" +
       "d\030\014 \001(\t\022\020\n\010lifeTime\030\r \001(\003\022\023\n\013createdTime" +
-      "\030\016 \001(\003\022\030\n\020searchTextSource\030\017 \001(\003B*\n\024cn.e" +
+      "\030\016 \001(\003\022\030\n\020searchTextSource\030\017 \001(\tB*\n\024cn.e" +
       "du.bupt.protobufB\017DeviceRespProto\210\001\001b\006pr" +
       "oto3"
     };

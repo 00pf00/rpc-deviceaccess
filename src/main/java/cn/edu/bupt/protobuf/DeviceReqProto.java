@@ -281,6 +281,7 @@ public final class DeviceReqProto {
         private volatile java.lang.Object siteId_;
         private long lifeTime_;
         private byte memoizedIsInitialized = -1;
+
         // Use DeviceReq.newBuilder() to construct.
         private DeviceReq(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
             super(builder);

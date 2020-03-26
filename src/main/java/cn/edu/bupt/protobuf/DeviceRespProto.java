@@ -309,6 +309,7 @@ public final class DeviceRespProto {
         private long createdTime_;
         private volatile java.lang.Object searchTextSource_;
         private byte memoizedIsInitialized = -1;
+
         // Use DeviceResp.newBuilder() to construct.
         private DeviceResp(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
             super(builder);

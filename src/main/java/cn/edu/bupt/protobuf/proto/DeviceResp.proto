@@ -17,6 +17,6 @@ message DeviceResp {
     string location = 11;
     string siteId = 12;
     int64 lifeTime = 13;
-    int64 createdTime =14;
-    string searchTextSource =15;
+    int64 createdTime = 14;
+    string searchTextSource = 15;
 }

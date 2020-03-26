@@ -13,6 +13,7 @@ import cn.edu.bupt.protobuf.DeviceProto;
 import cn.edu.bupt.security.model.Authority;
 import cn.edu.bupt.utils.StringUtil;
 import com.alibaba.fastjson.JSON;
+import com.datastax.driver.core.utils.UUIDs;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -66,6 +67,7 @@ public class DeviceController extends BaseController {
         System.out.println("**************************************************88");
         this.getLog().info("device name = {}", device.getId());
         Device device1 = Convert.toPojo(device, Device.class);
+        device1.setId(UUIDs.timeBased());
         Device savedDevice = checkNotNull(deviceService.saveDevice(device1));
         deviceService.sendMessage(savedDevice, "新增/更新设备：" + savedDevice.getName());
         return (DeviceProto.Device) Convert.toProtobuf(savedDevice, DeviceProto.Device.newBuilder());

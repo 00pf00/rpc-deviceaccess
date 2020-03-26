@@ -2,7 +2,7 @@ package cn.edu.bupt.task;
 
 import cn.bupt.edu.base.protocol.ProtocolReqMsgProto;
 import cn.bupt.edu.server.anotate.TaskMapping;
-import cn.bupt.edu.server.task.DefaultTaskServer;
+import cn.bupt.edu.server.task.DefaultServerTask;
 import cn.edu.bupt.protobuf.DeviceReqProto;
 import cn.edu.bupt.protobuf.DeviceRespProto;
 import com.google.protobuf.ByteString;
@@ -16,7 +16,7 @@ import java.lang.reflect.Method;
 @Component
 @Scope("prototype")
 @TaskMapping(paths = {"/api/v1/deviceaccess/device"})
-public class DeviceTask extends DefaultTaskServer {
+public class DeviceTask extends DefaultServerTask {
     private DeviceTask(ProtocolReqMsgProto.ProtocolReqMsg req, ChannelHandlerContext ctx) {
         super(req, ctx);
     }
@@ -25,8 +25,13 @@ public class DeviceTask extends DefaultTaskServer {
     }
 
     @Override
-    protected Object[] Decoding(ByteString rb, Method m) throws InvalidProtocolBufferException {
-        return new Object[]{DeviceReqProto.DeviceReq.parseFrom(rb)};
+    protected Object[] Decoding(ByteString rb, Method m) {
+        try {
+            return new Object[]{DeviceReqProto.DeviceReq.parseFrom(rb)};
+        } catch (InvalidProtocolBufferException e) {
+            this.getLogger().error("device task decoding fail ! err = {}", e.toString());
+        }
+        return null;
     }
 
     @Override

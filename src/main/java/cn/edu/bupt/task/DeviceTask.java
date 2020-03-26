@@ -9,13 +9,15 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Method;
+
 @Component
 @Scope("prototype")
 @TaskMapping(paths = {"/api/v1/deviceaccess/device"})
 public class DeviceTask extends DefaultTaskServer {
     @Override
-    protected Object Decoding(ByteString byteString) throws InvalidProtocolBufferException {
-        return DeviceReqProto.DeviceReq.parseFrom(byteString);
+    protected Object[] Decoding(ByteString rb, Method m) throws InvalidProtocolBufferException {
+        return new Object[]{DeviceReqProto.DeviceReq.parseFrom(rb)};
     }
 
     @Override

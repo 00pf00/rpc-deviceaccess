@@ -64,7 +64,7 @@ public class DeviceController extends BaseController {
     @HandlerMapping(path = "/device")
     public DeviceRespProto.DeviceResp saveDevice(@RequestBody DeviceReqProto.DeviceReq device) throws Exception {
         //将提交表单的形式转为json格式提交
-        System.out.println("**************************************************88");
+        System.out.println("**************************************/api/v1/deviceaccess/device*************************");
         this.getLog().info("device name = {}", device.getId());
         Device device1 = Convert.toPojo(device, Device.class);
         Device savedDevice = checkNotNull(deviceService.saveDevice(device1));
@@ -186,6 +186,7 @@ public class DeviceController extends BaseController {
             @RequestParam(required = false) String idOffset,
             @RequestParam(required = false) String textOffset) throws Exception {
         try {
+            this.getLog().info("*********************************/api/v1/deviceaccess/tenant/devices/tenantId*******************************");
             TextPageLink pageLink = new TextPageLink(limit, textSearch, idOffset == null ? null : toUUID(idOffset), textOffset);
             TextPageData<Device> ls = deviceService.findDevicesByTenantId(tenantId, pageLink);
             TextPageLink pageLink1 = new TextPageLink(1, textSearch);

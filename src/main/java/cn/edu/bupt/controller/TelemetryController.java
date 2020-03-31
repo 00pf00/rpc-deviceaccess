@@ -45,10 +45,11 @@ public class TelemetryController extends BaseController {
     //通过设备ID获取所有键的最新数据
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'getlatestData')")
     @RequestMapping(value = "/alllatestdata/{deviceId}", method = RequestMethod.GET)
-    @HandlerMapping(path = "/api/v1/deviceaccess/data/alllatestdata/deviceId")
+    @HandlerMapping(path = "/alllatestdata/deviceId")
     public List<TsKvEntry> getlatestData(@PathVariable("deviceId") String deviceId)
             throws Exception {
         try {
+            this.getLog().info("**********************************/api/v1/deviceaccess/data/alllatestdata/deviceId******************************");
             ListenableFuture<List<TsKvEntry>> tskventry = baseTimeseriesService.findAllLatest(toUUID(deviceId));
             List<TsKvEntry> ls = tskventry.get();
             return ls;

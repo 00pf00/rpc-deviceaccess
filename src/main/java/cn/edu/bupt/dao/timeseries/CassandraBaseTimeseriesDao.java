@@ -525,7 +525,7 @@ public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implem
                     ModelConstants.LONG_VALUE_COLUMN + "," +
                     ModelConstants.DOUBLE_VALUE_COLUMN + " " +
                     "FROM " + ModelConstants.TS_KV_LATEST_CF + " " +
-                    "WHERE " + ModelConstants.ENTITY_ID_COLUMN + EQUALS_PARAM);
+                    "WHERE " + ModelConstants.ENTITY_ID_COLUMN + EQUALS_PARAM +" ALLOW FILTERING");
         }
         return findAllLatestStmt;
     }

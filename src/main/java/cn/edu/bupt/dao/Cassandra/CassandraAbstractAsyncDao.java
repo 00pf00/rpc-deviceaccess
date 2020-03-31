@@ -15,11 +15,14 @@
  */
 package cn.edu.bupt.dao.Cassandra;
 
+import cn.bupt.edu.base.task.server.ServerTask;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
@@ -54,5 +57,9 @@ public abstract class CassandraAbstractAsyncDao extends CassandraAbstractDao {
                 return transformer.apply(input);
             }
         }, readResultsProcessingExecutor);
+    }
+
+    public static Logger getLogger() {
+        return logger;
     }
 }

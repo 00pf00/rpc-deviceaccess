@@ -13,6 +13,8 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 @Component
 @Slf4j
 public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implements TimeseriesDao {
+    private final static Logger logger = LoggerFactory.getLogger(CassandraBaseTimeseriesDao.class);
 
     public static final String INSERT_INTO = "INSERT INTO ";
     public static final String GENERATED_QUERY_FOR_ENTITY_TYPE_AND_ENTITY_ID = "Generated query [{}] for entityType {} and entityId {}";
@@ -58,6 +61,7 @@ public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implem
         KvEntry kvEntry = null;
         String strV = row.get(ModelConstants.STRING_VALUE_COLUMN, String.class);
         if (strV != null) {
+            l
             kvEntry = new StringDataEntry(key, strV);
         } else {
             Long longV = row.get(ModelConstants.LONG_VALUE_COLUMN, Long.class);
@@ -385,6 +389,7 @@ public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implem
     }
 
     private TsKvEntry convertResultToTsKvEntry(Row row) {
+        logger.info("row = {}",row);
         String key = row.getString(ModelConstants.KEY_COLUMN);
         long ts = row.getLong(ModelConstants.TS_COLUMN);
         return new BasicTsKvEntry(ts, toKvEntry(row, key));

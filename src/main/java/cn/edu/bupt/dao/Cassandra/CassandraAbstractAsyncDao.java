@@ -58,8 +58,4 @@ public abstract class CassandraAbstractAsyncDao extends CassandraAbstractDao {
             }
         }, readResultsProcessingExecutor);
     }
-
-    public static Logger getLogger() {
-        return logger;
-    }
 }

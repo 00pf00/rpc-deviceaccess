@@ -52,6 +52,7 @@ public class TelemetryController extends BaseController {
             this.getLog().info("**********************************/api/v1/deviceaccess/data/alllatestdata/deviceId******************************");
             ListenableFuture<List<TsKvEntry>> tskventry = baseTimeseriesService.findAllLatest(toUUID(deviceId));
             List<TsKvEntry> ls = tskventry.get();
+            this.getLog().info("result = {}",ls);
             return ls;
         } catch (Exception e) {
             e.printStackTrace();

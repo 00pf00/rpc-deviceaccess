@@ -1,6 +1,7 @@
 package cn.edu.bupt.controller;
 
 
+import cn.bupt.edu.server.anotate.HandlerMapping;
 import cn.edu.bupt.pojo.kv.Aggregation;
 import cn.edu.bupt.pojo.kv.BaseTsKvQuery;
 import cn.edu.bupt.pojo.kv.TsKvEntry;
@@ -44,6 +45,7 @@ public class TelemetryController extends BaseController {
     //通过设备ID获取所有键的最新数据
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'getlatestData')")
     @RequestMapping(value = "/alllatestdata/{deviceId}", method = RequestMethod.GET)
+    @HandlerMapping(path = "/api/v1/deviceaccess/data/alllatestdata/deviceId")
     public List<TsKvEntry> getlatestData(@PathVariable("deviceId") String deviceId)
             throws Exception {
         try {

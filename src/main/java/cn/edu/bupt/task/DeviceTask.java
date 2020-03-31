@@ -8,13 +8,11 @@ import cn.edu.bupt.protobuf.DeviceRespProto;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.channel.ChannelHandlerContext;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 
 @Component
-@Scope("prototype")
 @TaskMapping(paths = {"/api/v1/deviceaccess/device"})
 public class DeviceTask extends DefaultServerTask {
     private DeviceTask(ProtocolReqMsgProto.ProtocolReqMsg req, ChannelHandlerContext ctx) {

@@ -177,6 +177,7 @@ public class DeviceController extends BaseController {
 
     @PreAuthorize("#oauth2.hasScope('all') OR hasPermission(null ,'getDevices')")
     @RequestMapping(value = "/tenant/devices/{tenantId}", params = {"limit"}, method = RequestMethod.GET)
+    @HandlerMapping(path = "/tenant/devices/tenantId")
     public TextPageData<Device> getTenantDevicesCount(
             @PathVariable("tenantId") Integer tenantId,
             @RequestParam int limit,

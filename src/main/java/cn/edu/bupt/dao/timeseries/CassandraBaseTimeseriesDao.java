@@ -214,7 +214,9 @@ public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implem
 
     private long toPartitionTs(long ts) {
         LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneOffset.UTC);
-        return tsFormat.truncatedTo(time).toInstant(ZoneOffset.UTC).toEpochMilli();
+        long res = tsFormat.truncatedTo(time).toInstant(ZoneOffset.UTC).toEpochMilli()
+        logger.info("@@@@@@@@@@@@@@@@time = {}",res);
+        return res ;
     }
 
     private void findAllAsyncSequentiallyWithLimit(final TsKvQueryCursor cursor, final SimpleListenableFuture<List<TsKvEntry>> resultFuture) {

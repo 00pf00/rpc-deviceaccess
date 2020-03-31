@@ -358,6 +358,7 @@ public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implem
     }
 
     private List<TsKvEntry> convertResultToTsKvEntryList(List<Row> rows) {
+        logger.info("rows = {}",rows);
         List<TsKvEntry> entries = new ArrayList<>(rows.size());
         if (!rows.isEmpty()) {
             rows.forEach(row -> entries.add(convertResultToTsKvEntry(row)));

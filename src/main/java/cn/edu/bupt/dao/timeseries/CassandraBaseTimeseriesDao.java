@@ -61,7 +61,6 @@ public class CassandraBaseTimeseriesDao extends CassandraAbstractAsyncDao implem
         KvEntry kvEntry = null;
         String strV = row.get(ModelConstants.STRING_VALUE_COLUMN, String.class);
         if (strV != null) {
-            l
             kvEntry = new StringDataEntry(key, strV);
         } else {
             Long longV = row.get(ModelConstants.LONG_VALUE_COLUMN, Long.class);
